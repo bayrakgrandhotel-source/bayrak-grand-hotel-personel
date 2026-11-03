@@ -48,3 +48,4 @@ export default function StaffManagement({sb,staff,onCreate,onSaved}:{sb:Supabase
  <button disabled={busy}>Kaydet</button>
  </form></div>:<div className="panel"><div className="staff-list-tools"><h3>Personel Listesi ({staff.length})</h3><input placeholder="Personel ara..." value={search} onChange={e=>setSearch(e.target.value)}/></div>{staff.filter(s=>s.full_name.toLowerCase().includes(search.toLowerCase())||s.username.includes(search)).map(s=><div className="row" key={s.id}><div><b>{s.full_name}</b><p className="muted">@{s.username} · {s.active?"Aktif":"Pasif"}</p></div><button onClick={()=>open(s)} className="secondary">Bilgileri Düzenle</button></div>)}</div>}
  </section>;
+}
