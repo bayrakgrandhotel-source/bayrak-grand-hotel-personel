@@ -2,6 +2,7 @@
 import {createClient} from "@supabase/supabase-js";
 import {useEffect,useState} from "react";
 import type {FormEvent} from "react";
+import ReportsPanel from "./ReportsPanel";
 
 const SB_URL="https://wksbzfrpyrjzopoxnajc.supabase.co";
 const SB_KEY="sb_publishable_pzEUUtm95mpq3vynU2rVWQ_Z_82dfjl";
@@ -14,7 +15,7 @@ type DayOff={id:string;staff_id:string;leave_date:string;note:string|null};
 type HotelWifi={id:string;ip:string;created_at:string};
 type Announcement={id:string;title:string;body:string;created_at:string;created_by:string};
 type AnnouncementRead={announcement_id:string;staff_id:string;read_at:string};
-type Tab="personel"|"mesai"|"avans"|"izin"|"aylik"|"duyurular";
+type Tab="personel"|"mesai"|"avans"|"izin"|"aylik"|"duyurular"|"raporlar";
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const stamp=(value:string|null)=>value?new Date(value).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
 const tl=(v:number)=>Number(v||0).toLocaleString("tr-TR",{style:"currency",currency:"TRY"});
@@ -188,7 +189,7 @@ export default function Home(){
    <footer>TRABZON · Güvenli Personel Girişi</footer></div></main>;
  return <><header className="top"><span className="top-brand"><img src="/bayrak-logo-new.png" alt="Bayrak Grand Hotel logosu" className="hotel-logo-small"/><strong>BAYRAK GRAND HOTEL</strong></span><div className="top-actions"><button className="bell-button" type="button" title="Bildirimler" aria-label={"Bildirimler, "+unreadAnnouncementCount+" okunmamış"} onClick={()=>chooseTab("duyurular")}><span aria-hidden="true">🔔</span>{unreadAnnouncementCount>0&&<span className="bell-count">{unreadAnnouncementCount>99?"99+":unreadAnnouncementCount}</span>}</button><button className="secondary" onClick={logout}>Çıkış Yap</button></div></header><main className="shell">
  <div className="welcome"><div><h1>Merhaba, {profile.full_name}</h1><p className="muted">{manager?"Yönetici Paneli":"Personel Paneli"}</p></div><button className="secondary" onClick={()=>doTask(refresh,"Kayıtlar yenilendi.")} disabled={busy}>Yenile</button></div>
- <div className="tabs">{(manager?[["personel","Personeller"],["mesai","Giriş / Çıkış"],["avans","Avanslar"],["izin","Haftalık İzinler"],["aylik","Aylık İşlemler"],["duyurular","Duyurular"]]:[["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"],["duyurular","Bildirimler"]]).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id as Tab)}>{name}</button>)}</div>
+ <div className="tabs">{(manager?[["personel","Personeller"],["mesai","Giriş / Çıkış"],["avans","Avanslar"],["izin","Haftalık İzinler"],["aylik","Aylık İşlemler"],["raporlar","Raporlar"],["duyurular","Duyurular"]]:[["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"],["duyurular","Bildirimler"]]).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id as Tab)}>{name}</button>)}</div>
  {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
  {manager&&tab==="personel"&&<section className="panel"><h2>Otel Wi-Fi Ağını Tanımla</h2><p className="muted">Personeller yalnızca tanımladığınız otel ağından mesai giriş ve çıkışı yapabilir. Bu işlemi yaparken telefonunuzun veya bilgisayarınızın otelin Wi-Fi ağına bağlı olduğundan emin olun.</p><div className="actions" style={{marginTop:14}}><button disabled={busy} onClick={()=>doTask(async()=>{const {data,error}=await sb.rpc("hotel_register_wifi");if(error)throw error;if(!data)throw Error("Ağ bilgisi alınamadı")}, "Otel Wi-Fi ağı tanımlandı.")}>Bu Wi-Fi Ağını Tanımla</button></div>{wifiNetworks.length>0?<div style={{marginTop:12}}>{wifiNetworks.map(w=><div className="row" key={w.id}><span>Tanımlı Ağ: <b>{w.ip}</b></span><button className="danger" disabled={busy} onClick={()=>{if(confirm("Bu Wi-Fi ağı kaldırılacak. Bu ağdan mesai yapılamayacak. Devam edilsin mi?"))doTask(async()=>{const {error}=await sb.rpc("hotel_remove_wifi",{p_id:w.id});if(error)throw error},"Wi-Fi ağı kaldırıldı.")}}>Kaldır</button></div>)}</div>:<p className="hint">Henüz otel Wi-Fi ağı tanımlanmadı. Tanımlanana kadar personel mesai giriş-çıkışı kapalıdır.</p>}</section>}
  {manager&&tab==="personel"&&<div className="grid"><section className="panel"><h2>Personel Ekle</h2><form onSubmit={e=>{e.preventDefault();const d=values(e);doTask(()=>api({action:"create_staff",...d}),"Personel hesabı oluşturuldu.")}}>
@@ -217,6 +218,7 @@ export default function Home(){
  <label>Personel<select name="staff_id" defaultValue={editDay?.staff_id||staff[0]?.id} required>{options}</select></label><label>İzin Günü<input name="leave_date" type="date" defaultValue={editDay?.leave_date||day()} required/></label><label>Açıklama<input name="note" maxLength={500} defaultValue={editDay?.note||""}/></label><div className="actions"><button disabled={busy||staff.length===0}>{editDay?"Değişiklikleri Kaydet":"İzin Ekle"}</button>{editDay&&<button type="button" className="secondary" onClick={()=>setEditDay(null)}>İptal</button>}</div></form></section>}
  <section className="panel"><h2>{manager?"İzin Kayıtları":"Haftalık İzinlerim"}</h2>{daysOff.length?daysOff.map(d=><div className="row" key={d.id}><div><b>{d.leave_date}</b>{manager&&<p>{label(d.staff_id)}</p>}<p className="muted">{d.note}</p></div>{manager&&<div className="actions"><button className="secondary" onClick={()=>setEditDay(d)}>Düzenle</button><button className="danger" onClick={()=>{if(confirm("Bu izin kaydı silinsin mi?"))doTask(async()=>{const {error}=await sb.from("hotel_days_off").delete().eq("id",d.id);if(error)throw error})}}>Sil</button></div>}</div>):<p className="muted">İzin kaydı bulunmuyor.</p>}</section></>}
 
+ {manager&&tab==="raporlar"&&<ReportsPanel sb={sb} staff={staff}/>}
  {manager&&tab==="aylik"&&<section className="panel monthly-report">
   <h2>Aylık Personel İşlemleri</h2>
   <p className="muted">Personeli ve ayı seçerek giriş-çıkış, avans ve izin detaylarını görüntüleyebilirsiniz.</p>
