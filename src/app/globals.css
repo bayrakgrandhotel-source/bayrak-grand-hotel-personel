@@ -14,3 +14,19 @@
 .hotel-logo-loading{width:75px;height:130px}
 .hotel-logo-small{width:32px;height:55px;object-fit:contain;border:0;border-radius:0;background:transparent}
 @media(max-width:500px){.hotel-logo{width:105px;height:180px}.hotel-logo-small{width:30px;height:50px}}
+
+
+/* Daily attendance folders keep manager records compact and easy to browse. */
+.day-folders{display:grid;gap:9px}
+.day-folder{border:1px solid #60482d;background:#1e1813;border-radius:11px;overflow:hidden}
+.day-folder summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;padding:15px 17px;list-style:none;color:#e7c18a;font-weight:700}
+.day-folder summary::-webkit-details-marker{display:none}
+.day-folder summary::before{content:"▸";color:#d8b378;font-size:19px;transition:transform .16s}
+.day-folder[open] summary::before{transform:rotate(90deg)}
+.day-folder[open] summary{border-bottom:1px solid #634a2f;background:#302318}
+.day-folder summary:hover{background:#34281e}
+.day-title{font-size:16px}
+.day-count{margin-left:auto;color:#baa58a;font-size:12px;font-weight:400}
+.day-folder .table-wrap{padding:4px 12px 12px}
+.day-folder table{min-width:580px}
+@media(max-width:600px){.day-folder summary{padding:13px 11px}.day-title{font-size:14px}.day-folder .table-wrap{padding:2px 9px 9px}.day-count{font-size:11px}}
