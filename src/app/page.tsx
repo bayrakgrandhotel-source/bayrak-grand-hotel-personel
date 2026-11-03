@@ -5,7 +5,7 @@ import type {FormEvent} from "react";
 
 const SB_URL="https://wksbzfrpyrjzopoxnajc.supabase.co";
 const SB_KEY="sb_publishable_pzEUUtm95mpq3vynU2rVWQ_Z_82dfjl";
-const sb=createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+const sb=createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:true}});
 const email=(s:string)=>s.trim().toLowerCase()+"@personel.bayrak.example";
 type Profile={id:string;username:string;full_name:string;login_email:string;role:"manager"|"staff";active:boolean};
 type Shift={id:string;staff_id:string;work_date:string;check_in:string;check_out:string|null};
@@ -67,7 +67,11 @@ export default function Home(){
    setSetup(new URLSearchParams(window.location.search).get("kurulum")==="1");
    refresh().catch(e=>{handleError(e);setLoading(false)});
    const {data}=sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){setProfile(null)}});
-   return()=>data.subscription.unsubscribe();
+   const logoutWhenHidden=()=>{if(document.visibilityState==="hidden")void sb.auth.signOut({scope:"local"})};
+   const logoutWhenLeaving=()=>{void sb.auth.signOut({scope:"local"})};
+   document.addEventListener("visibilitychange",logoutWhenHidden);
+   window.addEventListener("pagehide",logoutWhenLeaving);
+   return()=>{data.subscription.unsubscribe();document.removeEventListener("visibilitychange",logoutWhenHidden);window.removeEventListener("pagehide",logoutWhenLeaving)};
  },[]);
  async function doTask(fn:()=>Promise<unknown>,ok="Kaydedildi."){
    setBusy(true);tell("");
@@ -91,8 +95,8 @@ export default function Home(){
  const options=staff.map(s=><option key={s.id} value={s.id}>{s.full_name} ({s.username})</option>);
  const ownOpen=shifts.find(s=>s.staff_id===profile?.id&&!s.check_out);
  const totalHours=shifts.filter(s=>s.staff_id===profile?.id&&s.check_out&&s.work_date.slice(0,7)===day().slice(0,7)).reduce((sum,s)=>sum+(new Date(s.check_out!).getTime()-new Date(s.check_in).getTime())/3600000,0);
- if(loading)return <div className="auth-wrap"><div className="auth-card"><div className="brandmark">BG</div><p className="sub">Uygulama açılıyor...</p></div></div>;
- if(!profile)return <main className="auth-wrap"><div className="auth-card"><div className="brandmark">BG</div><h1 className="brand">BAYRAK GRAND HOTEL</h1><p className="sub">{setup?"İlk Yönetici Hesabı":"Personel Takip Sistemi"}</p>
+ if(loading)return <div className="auth-wrap"><div className="auth-card"><img src="/bayrak-logo.webp" alt="Bayrak Grand Hotel logosu" className="hotel-logo hotel-logo-loading"/><p className="sub">Uygulama açılıyor...</p></div></div>;
+ if(!profile)return <main className="auth-wrap"><div className="auth-card"><img src="/bayrak-logo.webp" alt="Bayrak Grand Hotel logosu" className="hotel-logo"/><h1 className="brand">BAYRAK GRAND HOTEL</h1><p className="sub">{setup?"İlk Yönetici Hesabı":"Personel Takip Sistemi"}</p>
    {setup?<form onSubmit={bootstrap}>
      <label>Özel kurulum anahtarı<input name="key" type="password" autoComplete="off" required/></label>
      <label>Yönetici Ad Soyad<input name="full_name" required minLength={2} maxLength={100}/></label>
@@ -102,7 +106,7 @@ export default function Home(){
    </form>:<form onSubmit={login}><label>Kullanıcı Adı<input name="username" autoComplete="username" required placeholder="Kullanıcı adınız"/></label><label>Şifre<input type="password" name="password" autoComplete="current-password" required placeholder="Şifreniz"/></label><button disabled={busy}>Giriş Yap</button></form>}
    {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
    <footer>TRABZON · Güvenli Personel Girişi</footer></div></main>;
- return <><header className="top"><strong>BAYRAK GRAND HOTEL</strong><button className="secondary" onClick={logout}>Çıkış Yap</button></header><main className="shell">
+ return <><header className="top"><span className="top-brand"><img src="/bayrak-logo.webp" alt="Bayrak Grand Hotel logosu" className="hotel-logo-small"/><strong>BAYRAK GRAND HOTEL</strong></span><button className="secondary" onClick={logout}>Çıkış Yap</button></header><main className="shell">
  <div className="welcome"><div><h1>Merhaba, {profile.full_name}</h1><p className="muted">{manager?"Yönetici Paneli":"Personel Paneli"}</p></div><button className="secondary" onClick={()=>doTask(refresh,"Kayıtlar yenilendi.")} disabled={busy}>Yenile</button></div>
  <div className="tabs">{(manager?[["personel","Personeller"],["mesai","Giriş / Çıkış"],["avans","Avanslar"],["izin","Haftalık İzinler"]]:[["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"]]).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id as Tab)}>{name}</button>)}</div>
  {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
