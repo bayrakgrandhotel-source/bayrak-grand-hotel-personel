@@ -5,6 +5,7 @@ import type {FormEvent} from "react";
 import ReportsPanel from "./ReportsPanel";
 import StaffManagement from "./StaffManagement";
 import CompanySettings from "./CompanySettings";
+import EmployeePortal from "./EmployeePortal";
 
 const SB_URL="https://wksbzfrpyrjzopoxnajc.supabase.co";
 const SB_KEY="sb_publishable_pzEUUtm95mpq3vynU2rVWQ_Z_82dfjl";
@@ -197,6 +198,7 @@ export default function Home(){
    </form>:<form onSubmit={login}><label>Kullanıcı Adı<input name="username" autoComplete="username" required placeholder="Kullanıcı adınız"/></label><label>Şifre<input type="password" name="password" autoComplete="current-password" required placeholder="Şifreniz"/></label><button disabled={busy}>Giriş Yap</button></form>}
    {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
    <footer>TRABZON · Güvenli Personel Girişi</footer></div></main>;
+ if(!manager)return <EmployeePortal sb={sb} profile={profile} shifts={shifts} advances={advances} daysOff={daysOff} announcements={announcements} reads={announcementReads} onRefresh={async()=>{await refresh()}} onLogout={logout}/>;
  return <><header className="top"><span className="top-brand"><img src="/bayrak-logo-new.png" alt="Bayrak Grand Hotel logosu" className="hotel-logo-small"/><strong>BAYRAK GRAND HOTEL</strong></span><div className="top-actions"><button className="bell-button" type="button" title="Bildirimler" aria-label={"Bildirimler, "+unreadAnnouncementCount+" okunmamış"} onClick={()=>chooseTab("duyurular")}><span aria-hidden="true">🔔</span>{unreadAnnouncementCount>0&&<span className="bell-count">{unreadAnnouncementCount>99?"99+":unreadAnnouncementCount}</span>}</button><button className="secondary" onClick={logout}>Çıkış Yap</button></div></header>{manager&&<aside className="manager-sidebar"><div className="sidebar-brand"><img src="/bayrak-logo-new.png" alt="" /><strong>BAYRAK GRAND HOTEL</strong><small>Yönetici Paneli</small></div><nav aria-label="Yönetici menüsü">{([["genel","★","Genel Bakış"],["personel","♙","Personeller"],["mesai","⇄","Giriş / Çıkış"],["avans","₺","Avanslar"],["izin","▦","İzinler"],["aylik","▤","Aylık İşlemler"],["raporlar","▥","Raporlar"],["duyurular","♧","Duyurular"],["ayarlar","⚙","Ayarlar"]] as const).map(([key,icon,title])=><button key={key} className={tab===key?"side-link selected":"side-link"} onClick={()=>chooseTab(key)}><span className="side-icon" aria-hidden="true">{icon}</span>{title}</button>)}</nav><button className="sidebar-logout" onClick={logout}>Çıkış Yap</button></aside>}<main className={manager?"shell shell-manager":"shell"}>
  <div className="welcome"><div><h1>Merhaba, {profile.full_name}</h1><p className="muted">{manager?"Yönetici Paneli":"Personel Paneli"}</p></div><button className="secondary" onClick={()=>doTask(refresh,"Kayıtlar yenilendi.")} disabled={busy}>Yenile</button></div>
  {!manager&&<div className="tabs">{([["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"],["duyurular","Bildirimler"]] as const).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id)}>{name}</button>)}</div>}
