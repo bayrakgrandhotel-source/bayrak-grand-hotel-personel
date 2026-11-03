@@ -46,3 +46,21 @@
 .monthly-section tfoot th{background:#30271d;font-weight:700;color:#e9c68e}
 @media(max-width:750px){.month-filters{grid-template-columns:1fr 1fr}.month-filters button{grid-column:1/-1}.monthly-stats{grid-template-columns:1fr}.monthly-stats>div{padding:13px}.monthly-stats strong{font-size:22px}}
 @media(max-width:450px){.month-filters{grid-template-columns:1fr}.month-filters button{grid-column:auto}}
+
+
+/* Hotel-wide notification bell and announcement inbox */
+.top-actions{display:flex;align-items:center;gap:9px}
+.bell-button{position:relative;display:flex;align-items:center;justify-content:center;min-width:41px;min-height:39px;border:1px solid #715537;color:#eed4aa;background:#34271c;padding:6px 10px;font-size:20px}
+.bell-count{position:absolute;right:-5px;top:-9px;display:inline-flex;justify-content:center;align-items:center;min-width:21px;height:21px;padding:0 4px;border-radius:13px;font-size:11px;background:#b34639;color:#fff;border:1px solid #e3ac82;line-height:1}
+.notifications-unread{display:inline-flex;align-items:center;background:#72402c;border:1px solid #a46847;color:#f9d5a8;font-size:11px;line-height:1.2;font-weight:700;border-radius:14px;padding:4px 8px;vertical-align:middle;margin-left:8px}
+.announcement-compose{padding:19px;border:1px solid #695033;border-radius:13px;background:#1e1813;margin:22px 0}
+.announcement-compose form{max-width:680px}
+.announcement-compose button{justify-self:start}
+.announcement-compose textarea{display:block;width:100%;margin-top:7px;border-radius:10px;background:#231c16;border:1px solid #69543b;color:#f4e5d1;padding:13px;font:inherit;resize:vertical;min-height:110px}
+.announcement-compose textarea:focus{outline:2px solid #bf9551}
+.announcements-list{display:grid;gap:12px;margin-top:18px}
+.announcement-item{border:1px solid #5e492e;padding:17px;border-radius:12px;background:#201914}
+.announcement-new{border-color:#ae8654;background:#2a2018}
+.announcement-title{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:7px;color:#eccb95}
+.announcement-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;margin:12px 0 14px}
+@media(max-width:560px){.top-actions{gap:6px}.bell-button{min-width:35px;min-height:35px;font-size:18px}.announcement-compose{padding:14px}.announcement-item{padding:13px}}
