@@ -1,6 +1,6 @@
 "use client";
 import {createClient} from "@supabase/supabase-js";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import type {FormEvent} from "react";
 import ReportsPanel from "./ReportsPanel";
 import StaffManagement from "./StaffManagement";
@@ -8,7 +8,7 @@ import CompanySettings from "./CompanySettings";
 
 const SB_URL="https://wksbzfrpyrjzopoxnajc.supabase.co";
 const SB_KEY="sb_publishable_pzEUUtm95mpq3vynU2rVWQ_Z_82dfjl";
-const sb=createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:true}});
+const sb=createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
 const email=(s:string)=>s.trim().toLowerCase()+"@personel.bayrak.example";
 type Profile={id:string;username:string;full_name:string;login_email:string;role:"manager"|"staff";active:boolean};
 type Shift={id:string;staff_id:string;work_date:string;check_in:string;check_out:string|null};
@@ -26,6 +26,7 @@ const values=(e:FormEvent<HTMLFormElement>)=>Object.fromEntries(new FormData(e.c
 
 export default function Home(){
  const [profile,setProfile]=useState<Profile|null>(null);
+ const sessionRole=useRef<"manager"|"staff"|null>(null);
  const [users,setUsers]=useState<Profile[]>([]);
  const [shifts,setShifts]=useState<Shift[]>([]);
  const [advances,setAdvances]=useState<Advance[]>([]);
@@ -64,11 +65,14 @@ export default function Home(){
    if(!response.ok||payload.error)throw Error(payload.error||"İşlem başarısız.");
    return payload;
  }
- async function refresh(){
+ async function refresh(isInitialLoad=false){
    const {data:{user},error:authError}=await sb.auth.getUser();
-   if(authError||!user){setProfile(null);setLoading(false);return}
+   if(authError||!user){sessionRole.current=null;setProfile(null);setLoading(false);return}
    const {data:me,error:pErr}=await sb.from("hotel_profiles").select("*").eq("id",user.id).maybeSingle();
-   if(pErr||!me||!me.active){await sb.auth.signOut();setProfile(null);setLoading(false);tell("Hesap bulunamadı veya pasif durumda.",true);return}
+   if(pErr||!me||!me.active){await sb.auth.signOut({scope:"local"});sessionRole.current=null;setProfile(null);setLoading(false);tell("Hesap bulunamadı veya pasif durumda.",true);return}
+   // Staff are never restored from a previous page load. Managers may keep their sessions.
+   if(isInitialLoad&&me.role!=="manager"){await sb.auth.signOut({scope:"local"});sessionRole.current=null;setProfile(null);setLoading(false);return}
+   sessionRole.current=me.role;
    const isManager=me.role==="manager";
    const p=isManager?sb.from("hotel_profiles").select("*"):sb.from("hotel_profiles").select("*").eq("id",user.id);
    const results=await Promise.all([p,sb.from("hotel_attendance").select("*").order("check_in",{ascending:false}).limit(400),sb.from("hotel_advances").select("*").order("advance_date",{ascending:false}).limit(400),sb.from("hotel_days_off").select("*").order("leave_date",{ascending:false}).limit(400),sb.from("hotel_announcements").select("*").order("created_at",{ascending:false}).limit(100),sb.from("hotel_announcement_reads").select("announcement_id,staff_id,read_at").eq("staff_id",user.id).limit(200)]);
@@ -82,10 +86,13 @@ export default function Home(){
  }
  useEffect(()=>{
    setSetup(new URLSearchParams(window.location.search).get("kurulum")==="1");
-   refresh().catch(e=>{handleError(e);setLoading(false)});
-   const {data}=sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){setProfile(null)}});
-   const logoutWhenHidden=()=>{if(document.visibilityState==="hidden")void sb.auth.signOut({scope:"local"})};
-   const logoutWhenLeaving=()=>{void sb.auth.signOut({scope:"local"})};
+   refresh(true).catch(e=>{handleError(e);setLoading(false)});
+   const {data}=sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){sessionRole.current=null;setProfile(null)}});
+   // Only staff are signed out when closing or backgrounding the app.
+   // Managers remain signed in until they explicitly choose "Çıkış Yap".
+   const logoutStaffOnExit=()=>{if(sessionRole.current==="staff")void sb.auth.signOut({scope:"local"}).catch(()=>{})};
+   const logoutWhenHidden=()=>{if(document.visibilityState==="hidden")logoutStaffOnExit()};
+   const logoutWhenLeaving=()=>logoutStaffOnExit();
    document.addEventListener("visibilitychange",logoutWhenHidden);
    window.addEventListener("pagehide",logoutWhenLeaving);
    return()=>{data.subscription.unsubscribe();document.removeEventListener("visibilitychange",logoutWhenHidden);window.removeEventListener("pagehide",logoutWhenLeaving)};
