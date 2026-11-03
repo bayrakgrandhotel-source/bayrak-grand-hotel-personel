@@ -7,3 +7,10 @@
 @media(max-width:500px){.hotel-logo{width:170px;height:170px}.hotel-logo-small{width:38px;height:38px}.top-brand strong{font-size:14px}}
 
 .auth-card{background:linear-gradient(145deg,#2b211b 0%,#241a15 100%);border-color:#8f693e}.auth-card input{background:#282832;border-color:#80613c}.auth-card button:not(.secondary){background:linear-gradient(120deg,#ddba80,#cda164);color:#231711}.auth-card .brand{font-size:23px;color:#e8bb73}.auth-card .sub{margin-top:8px}.hotel-logo-loading{width:110px;height:110px}
+
+
+/* The new Bayrak emblem is a portrait transparent PNG, not the old square wordmark. */
+.hotel-logo{width:116px;height:200px;max-width:100%;object-fit:contain;margin:0 auto 5px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.hotel-logo-loading{width:75px;height:130px}
+.hotel-logo-small{width:32px;height:55px;object-fit:contain;border:0;border-radius:0;background:transparent}
+@media(max-width:500px){.hotel-logo{width:105px;height:180px}.hotel-logo-small{width:30px;height:50px}}
