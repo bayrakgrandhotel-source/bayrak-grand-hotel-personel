@@ -209,3 +209,157 @@
 .emp-success{background:#ecf9ee;color:#257043;border:1px solid #c1eacb}
 @media(max-width:820px){.emp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.emp-top>strong{font-size:15px}}
 @media(max-width:480px){.emp-main{padding:20px 13px 70px}.emp-intro h1{font-size:23px}.emp-intro button{padding:10px;font-size:12px}.emp-stats{gap:9px}.emp-stats article{padding:14px}.emp-stats article strong{font-size:19px}.emp-paper{padding:16px}.emp-top>strong{font-size:13px}.emp-id{gap:12px}.emp-line b{max-width:100%;overflow-wrap:anywhere}}
+
+
+/* BAYRAK GRAND HOTEL — UNIFIED WHITE & GOLD THEME (all three views) */
+:root{
+ color-scheme:light;--gold:#C9A35A;--gold-dark:#936B2D;--gold-light:#F4E8D1;
+ --cream:#FAF8F3;--white:#FFFFFF;--espresso:#3B2A1D;--brown:#6B5643;
+ --line:#E6D8BF;--shadow:0 7px 25px rgba(60,42,20,.07);
+ background:var(--cream);color:var(--espresso)
+}
+html,body{background:var(--cream);color:var(--espresso)}
+body{background:linear-gradient(130deg,#FCFBF8 2%,#F6F1E8 100%) fixed}
+button{background:var(--gold);color:#302217;border:1px solid #AE8645}
+button:hover:not(:disabled){background:#D9B876}
+button.secondary{background:#FFF;color:#674B25;border:1px solid #DAC5A0}
+button.secondary:hover:not(:disabled){background:#FBF5EA}
+button.danger{background:#874C47;color:#fff;border-color:#874C47}
+button.danger:hover:not(:disabled){background:#713D38}
+input,select,textarea{background:#FFF;color:var(--espresso);border:1px solid #DCCEB5;color-scheme:light}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+input::placeholder,textarea::placeholder{color:#978979}
+input[type=date],input[type=datetime-local],input[type=month],input[type=time]{color-scheme:light}
+label{color:var(--brown)}
+h1,h2,h3{color:var(--espresso)}
+.muted,small,.hint{color:#81725F}
+a{color:#846021}
+.error{background:#FFF0EF;color:#9B4137;border:1px solid #EBC4BD}
+.success{background:#ECF8ED;color:#23603F;border:1px solid #BFE2C6}
+
+/* LOGIN — ivory canvas, white inset card, gold emblem */
+.auth-wrap{background:radial-gradient(ellipse at top,#FFFDF8 10%,#F3EADB 100%)}
+.auth-card{background:#FFF;border:1px solid #DECAAA;box-shadow:0 24px 64px rgba(77,52,19,.16)}
+.auth-card .brand{color:#846024}
+.auth-card .sub,.auth-card footer{color:#806F58}
+.auth-card input{background:#FFFDF9;color:#3B2A1D;border-color:#D7C4A3}
+.auth-card button:not(.secondary){background:linear-gradient(115deg,#C5A05A,#E5CC99);color:#302214;border:1px solid #C3A061}
+.auth-card button:not(.secondary):hover{background:#DDBD80}
+.auth-card .hotel-logo{filter:drop-shadow(0 2px 3px rgba(151,108,38,.11))}
+
+/* MANAGER — light professional dashboard */
+header.top{background:#FFF;border-bottom:1px solid var(--line);box-shadow:0 2px 14px rgba(60,42,20,.05)}
+header.top strong{color:#936C30}
+.welcome h1{color:var(--espresso)}
+.shell,.shell-manager{color:var(--espresso)}
+.panel{background:#FFF;border:1px solid var(--line);box-shadow:var(--shadow)}
+.panel h2,.panel h3{color:#785420}
+.row{border-top-color:#EDE2D1}
+.row b{color:#46331F}
+table th,table td{border-color:#ECE1D0}
+table th{background:#FBF6EC;color:#785623}
+table td{color:#493625}
+.tabs button{background:#FFF;border:1px solid #DDC9A6;color:#654E2D}
+.tabs button.active{background:#EAD5AA;color:#422F1A}
+.manager-sidebar{background:#FFF;border-right:1px solid #E8DCC6;box-shadow:4px 0 15px rgba(57,40,17,.04)}
+.sidebar-brand{border-bottom-color:#E8DCC7}
+.sidebar-brand strong{color:#936B2C}
+.sidebar-brand small{color:#8D7A61}
+.manager-sidebar .side-link{color:#635038}
+.manager-sidebar .side-link:hover{background:#FBF4E8}
+.manager-sidebar .side-link.selected{background:#F5E8CF;color:#78521D;border-color:#DCC29A}
+.side-icon{color:#AD8541}
+.sidebar-logout{background:#FCF8F0;color:#795724;border:1px solid #E3CDA4}
+.sidebar-logout:hover{background:#F5E8D3}
+.overview-card{background:#FFF;border:1px solid #E5D7C0;box-shadow:var(--shadow);color:#6A5437}
+.overview-card:hover{background:#FFFCF6}
+.overview-card>span{color:#715836}
+.overview-card>strong{color:#8D672B}
+.overview-card>small{color:#8D7E69}
+.day-folder{background:#FFFDF9;border-color:#E8D9C0}
+.day-folder summary{color:#6F5128}
+.day-folder summary::before{color:#AE8847}
+.day-folder[open] summary{background:#F9F1E4;border-bottom-color:#E5D7C2}
+.day-folder summary:hover{background:#FAF4EA}
+.day-count{color:#89785D}
+.monthly-heading{color:#856128}
+.monthly-stats>div{background:#FFFCF6;border-color:#E6D6B7}
+.monthly-stats span{color:#7E6A4E}
+.monthly-stats strong{color:#946E31}
+.monthly-stats small{color:#867965}
+.monthly-section{border-color:#E7D9C2}
+.monthly-section tfoot th{background:#F4E8D2;color:#765222}
+.notifications-unread{background:#F5E7CE;color:#754C16;border-color:#DDC295}
+.bell-button{background:#FCF4E5;border-color:#DECA9F;color:#936B2A}
+.bell-count{background:#976D2D;border-color:#FFF;color:#FFF}
+.announcement-compose{background:#FFFCF7;border-color:#E7D7B9}
+.announcement-compose textarea{background:#FFF;border-color:#D7C4A2;color:#3B2A1D}
+.announcement-item{background:#FFF;border-color:#E4D5BA}
+.announcement-new{background:#FFFBF3;border-color:#C9A35A}
+.announcement-title{color:#785623}
+.company-settings-form label{color:#654B2B}
+.company-settings-form input{background:#FFF;border-color:#DCCAAA;color:#3B2A1D}
+.company-settings-footer{border-color:#E8DCCA}
+.staff-detail-form>h3{border-color:#E6D9C3}
+.staff-detail-form textarea{background:#FFF;color:#3B2A1D;border-color:#D8C6A7}
+.staff-image-input{border-color:#D8C5A4}
+.staff-image-input span{color:#89765D}
+.report-menu{background:#FFF;border-color:#E8DAC3}
+.report-menu-group{border-bottom-color:#EEE3D0}
+.report-menu-title{color:#8C682F}
+.report-menu .report-link{color:#624D30}
+.report-menu .report-link:hover{background:#FBF3E5}
+.report-menu .report-link.selected{background:#F4E5CC;color:#72511D;border-left-color:#B88C43}
+.report-period{color:#8F8068}
+.report-stats span{background:#FFFCF7;color:#816F58;border-color:#E5D6BC}
+.report-stats b{color:#92702F}
+.report-warning{background:#FFF6E4;color:#715022;border-color:#D5B77F}
+.report-people>div{background:#FBF6ED;color:#4C3925}
+.report-people strong{color:#86632C}
+.report-plan{background:#FFFCF7;border-color:#E5D6BD}
+.report-plan>summary{color:#81602C}
+.report-plans-list>div{border-color:#E7D9C1}
+
+/* STAFF — white, champagne gold and espresso */
+.emp-app{--emp-gold:#C9A35A;--emp-gold-dark:#936B2D;--emp-gold-pale:#F5E8CE;
+ --emp-cream:#FAF8F3;--emp-line:#E5D8C1;--emp-ink:#3B2A1D;
+ font-family:Arial,Helvetica,sans-serif;background:var(--emp-cream);color:var(--emp-ink);min-height:100vh}
+.emp-app button{background:#C9A35A;color:#392816;border:1px solid #BC9855}
+.emp-app button:hover:not(:disabled){background:#E0C184}
+.emp-app input,.emp-app select,.emp-app textarea{color:#3B2A1D;background:#FFF;border:1px solid #DDCBAF}
+.emp-app h1,.emp-app h2,.emp-app h3{color:#3B2A1D}
+.emp-app label{color:#6B5643}
+.emp-app small{color:#81715C}
+.emp-top{background:#FFF;border-bottom:1px solid #E8DCC6;box-shadow:0 2px 12px rgba(54,38,21,.05)}
+.emp-top .emp-top-brand{display:flex;align-items:center;gap:8px;min-width:0}
+.emp-top-brand img{width:31px;height:46px;object-fit:contain}
+.emp-top-brand strong{font-family:Georgia,serif;color:#936B2D;font-size:15px;letter-spacing:.4px;white-space:nowrap}
+.emp-top>button{display:flex;justify-content:center;align-items:center;background:#FCF4E7;color:#936B2D;border:1px solid #E1CDA4;min-width:44px;height:43px;position:relative}
+.emp-top>button small{background:#93702D;border:1px solid white;color:white}
+.emp-drawer{background:#FFF;box-shadow:10px 0 35px rgba(56,39,18,.13)}
+.emp-avatar{background:#F6E8CC;color:#93702D}
+.emp-id b{color:#3B2A1D}
+.emp-id small,.emp-id span{color:#8A7A65}
+.emp-drawer>p{color:#937F61}
+.emp-drawer nav button,.emp-drawer>button{color:#5D4930;background:#FFF;border-bottom-color:#F0E9DD}
+.emp-drawer nav button.chosen{background:#F7ECD8;color:#785421}
+.emp-drawer nav button>span,.emp-drawer nav .emp-nav-symbol{background:#F8EFDE;color:#946B2C;display:grid;place-items:center}
+.emp-drawer nav button em{background:#946B2C;color:#FFF}
+.emp-drawer>.emp-logout{background:#FAF4E9;color:#805D2B;border-color:#DECAA5}
+.emp-intro small{color:#987435}
+.emp-intro h1{color:#3B2A1D}
+.emp-intro p{color:#86765F}
+.emp-intro button{background:#FFF;color:#8C662F;border:1px solid #DDCBA9}
+.emp-stats article{background:#FFF;border-color:#E8DCC8;box-shadow:var(--shadow)}
+.emp-stats article strong{color:#94702D}
+.emp-paper{background:#FFF;border-color:#E8DCC8;box-shadow:var(--shadow)}
+.emp-paper p{color:#6B5D4A}
+.emp-clock button:last-child{background:#FFF;color:#765321;border:1px solid #CDAE79}
+.emp-line{border-bottom-color:#EDE3D5}
+.emp-line b{color:#51402C}
+.emp-news{border-top-color:#EAE0D1}
+.emp-news b{color:#3B2A1D}
+.emp-news p{color:#6B5941}
+.emp-error{background:#FFF1F0;color:#963B33;border-color:#E7C6BE}
+.emp-success{background:#EFF8F0;color:#276B45;border-color:#BFDCC6}
+@media(max-width:480px){.emp-top-brand strong{font-size:12px}.emp-top-brand img{width:24px;height:37px}}
