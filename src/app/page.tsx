@@ -11,6 +11,7 @@ type Profile={id:string;username:string;full_name:string;login_email:string;role
 type Shift={id:string;staff_id:string;work_date:string;check_in:string;check_out:string|null};
 type Advance={id:string;staff_id:string;advance_date:string;amount:number;note:string|null};
 type DayOff={id:string;staff_id:string;leave_date:string;note:string|null};
+type HotelWifi={id:string;ip:string;created_at:string};
 type Tab="personel"|"mesai"|"avans"|"izin";
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const stamp=(value:string|null)=>value?new Date(value).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
@@ -24,6 +25,7 @@ export default function Home(){
  const [shifts,setShifts]=useState<Shift[]>([]);
  const [advances,setAdvances]=useState<Advance[]>([]);
  const [daysOff,setDaysOff]=useState<DayOff[]>([]);
+ const [wifiNetworks,setWifiNetworks]=useState<HotelWifi[]>([]);
  const [tab,setTab]=useState<Tab>("mesai");
  const [setup,setSetup]=useState(false);
  const [loading,setLoading]=useState(true);
@@ -56,6 +58,7 @@ export default function Home(){
    const results=await Promise.all([p,sb.from("hotel_attendance").select("*").order("check_in",{ascending:false}).limit(400),sb.from("hotel_advances").select("*").order("advance_date",{ascending:false}).limit(400),sb.from("hotel_days_off").select("*").order("leave_date",{ascending:false}).limit(400)]);
    const problem=results.find(x=>x.error)?.error;
    if(problem)throw Error(problem.message);
+   if(isManager){const {data:wifi,error:wifiErr}=await sb.from("hotel_wifi_networks").select("id,ip,created_at").order("created_at",{ascending:false});if(wifiErr)throw wifiErr;setWifiNetworks(wifi as HotelWifi[]||[])}else setWifiNetworks([]);
    setProfile(me as Profile);setUsers(results[0].data as Profile[]||[]);
    setShifts(results[1].data as Shift[]||[]);setAdvances(results[2].data as Advance[]||[]);setDaysOff(results[3].data as DayOff[]||[]);
    setLoading(false);
@@ -103,6 +106,7 @@ export default function Home(){
  <div className="welcome"><div><h1>Merhaba, {profile.full_name}</h1><p className="muted">{manager?"Yönetici Paneli":"Personel Paneli"}</p></div><button className="secondary" onClick={()=>doTask(refresh,"Kayıtlar yenilendi.")} disabled={busy}>Yenile</button></div>
  <div className="tabs">{(manager?[["personel","Personeller"],["mesai","Giriş / Çıkış"],["avans","Avanslar"],["izin","Haftalık İzinler"]]:[["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"]]).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id as Tab)}>{name}</button>)}</div>
  {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
+ {manager&&tab==="personel"&&<section className="panel"><h2>Otel Wi-Fi Ağını Tanımla</h2><p className="muted">Personeller yalnızca tanımladığınız otel ağından mesai giriş ve çıkışı yapabilir. Bu işlemi yaparken telefonunuzun veya bilgisayarınızın otelin Wi-Fi ağına bağlı olduğundan emin olun.</p><div className="actions" style={{marginTop:14}}><button disabled={busy} onClick={()=>doTask(async()=>{const {data,error}=await sb.rpc("hotel_register_wifi");if(error)throw error;if(!data)throw Error("Ağ bilgisi alınamadı")}, "Otel Wi-Fi ağı tanımlandı.")}>Bu Wi-Fi Ağını Tanımla</button></div>{wifiNetworks.length>0?<div style={{marginTop:12}}>{wifiNetworks.map(w=><div className="row" key={w.id}><span>Tanımlı Ağ: <b>{w.ip}</b></span><button className="danger" disabled={busy} onClick={()=>{if(confirm("Bu Wi-Fi ağı kaldırılacak. Bu ağdan mesai yapılamayacak. Devam edilsin mi?"))doTask(async()=>{const {error}=await sb.rpc("hotel_remove_wifi",{p_id:w.id});if(error)throw error},"Wi-Fi ağı kaldırıldı.")}}>Kaldır</button></div>)}</div>:<p className="hint">Henüz otel Wi-Fi ağı tanımlanmadı. Tanımlanana kadar personel mesai giriş-çıkışı kapalıdır.</p>}</section>}
  {manager&&tab==="personel"&&<div className="grid"><section className="panel"><h2>Personel Ekle</h2><form onSubmit={e=>{e.preventDefault();const d=values(e);doTask(()=>api({action:"create_staff",...d}),"Personel hesabı oluşturuldu.")}}>
  <label>Ad Soyad<input name="full_name" required minLength={2}/></label><label>Kullanıcı Adı<input name="username" required pattern="[a-z0-9._-]{3,30}"/></label><label>Şifre (en az 8 karakter)<input name="password" type="password" minLength={8} required/></label><button disabled={busy}>Personeli Ekle</button></form></section>
  <section className="panel"><h2>Personel Listesi ({staff.length})</h2>{staff.length===0?<p className="muted">Henüz personel eklenmemiş.</p>:staff.map(s=><div className="row" key={s.id}><div><b>{s.full_name}</b><p className="muted">@{s.username} · {s.active?"Aktif":"Pasif"}</p></div><div className="actions">
