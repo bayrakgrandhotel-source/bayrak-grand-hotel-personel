@@ -147,3 +147,65 @@
 .company-settings-footer{grid-column:1/-1;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-top:1px solid #58422c;padding-top:19px}
 .company-settings-footer p{font-size:12px}
 @media(max-width:620px){.company-settings-form{grid-template-columns:1fr}.company-settings-footer{flex-direction:column;align-items:stretch}.company-settings-footer button{width:100%}}
+
+
+/* Employee mobile portal, white cards with muted burgundy and warm gold. */
+.emp-app{--rose:#a85062;--ink:#29313b;--soft:#f7f8fa;--line:#e8e8ed;--muted:#87909b;font-family:Arial,Helvetica,sans-serif;background:#f7f8fa;color:#29313b;min-height:100vh;padding-top:67px}
+.emp-app button{background:#a85062;color:#fff;border:0;border-radius:10px;font-size:14px;padding:12px 15px}
+.emp-app button:disabled{opacity:.45}
+.emp-app input,.emp-app select,.emp-app textarea{background:#fff;color:#29313b;border:1px solid #dfe2e7;border-radius:9px;box-sizing:border-box;max-width:100%;padding:12px;font-size:14px}
+.emp-app input[type=date]{color-scheme:light}
+.emp-app h2{color:#29313b;font-size:19px;margin-bottom:15px}
+.emp-app label{color:#56616c;font-size:13px}
+.emp-app small{color:#87909b}
+.emp-top{height:67px;background:#fff;border-bottom:1px solid #ebebef;display:flex;justify-content:space-between;align-items:center;padding:0 clamp(12px,4vw,35px);position:fixed;top:0;left:0;right:0;z-index:43;gap:10px}
+.emp-top>strong{font-family:Georgia,serif;font-size:17px;color:#a85062;letter-spacing:.4px;text-align:center}
+.emp-top>button{color:#a85062;background:#f8edf0;min-width:45px;height:43px;font-size:23px;position:relative}
+.emp-top>button small{position:absolute;right:-5px;top:-7px;border-radius:12px;background:#a85062;color:white;min-width:18px;padding:3px;font-size:10px}
+.emp-overlay{position:fixed;inset:0;z-index:49;background:#12172299!important;border-radius:0!important}
+.emp-drawer{position:fixed;left:0;top:0;bottom:0;z-index:50;width:min(355px,85vw);padding:32px 21px;background:#fff;box-shadow:0 0 27px #0001;display:flex;flex-direction:column;overflow:auto;transform:translateX(-105%);transition:transform .2s}
+.emp-drawer.visible{transform:translateX(0)}
+.emp-id{display:flex;align-items:center;gap:17px;margin:22px 0 30px;min-width:0}
+.emp-id>div:last-child{min-width:0;display:grid;gap:6px}
+.emp-id b{color:#242932;font-size:18px;overflow-wrap:anywhere}
+.emp-id small,.emp-id span{font-size:13px;color:#8f98a2}
+.emp-avatar{height:75px;width:75px;flex:none;border-radius:18px;background:#f7e9ee;color:#a85062;display:grid;place-items:center;font-size:30px;font-weight:bold;overflow:hidden}
+.emp-avatar img{width:100%;height:100%;object-fit:cover}
+.emp-drawer>p{color:#a3abb4;font-size:12px;margin:10px 4px 20px}
+.emp-drawer nav{display:grid;gap:5px}
+.emp-drawer nav button,.emp-drawer>button{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;color:#333b45;padding:12px 9px;font-size:15px;font-weight:500;border-bottom:1px solid #f0f0f0;border-radius:7px}
+.emp-drawer nav button.chosen{background:#fbf0f2;color:#a85062}
+.emp-drawer nav button em{margin-left:auto;font-size:11px;background:#a85062;color:#fff;border-radius:11px;padding:3px 7px}
+.emp-drawer nav button>span{height:36px;width:36px;flex:none;background:#f8eef1;color:#a85062;display:grid;place-items:center;border-radius:10px;font-size:21px}
+.emp-drawer>.emp-logout{margin-top:auto;background:#a85062;color:white;justify-content:center}
+.emp-main{max-width:1170px;margin:auto;padding:27px clamp(14px,3.5vw,40px) 80px}
+.emp-intro{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:25px}
+.emp-intro small{color:#a85062;font-size:10px;letter-spacing:1.2px}
+.emp-intro h1{color:#2f3339;margin-top:8px;font-size:29px}
+.emp-intro p{color:#8b929b;margin-top:7px}
+.emp-intro button{background:#fff;color:#a85062;border:1px solid #e8cdd3;white-space:nowrap}
+.emp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:20px}
+.emp-stats article{min-width:0;background:#fff;padding:18px;border-radius:15px;border:1px solid #ebebef;box-shadow:0 6px 18px #29313b08;display:flex;flex-direction:column;gap:13px}
+.emp-stats article strong{color:#a85062;font-size:22px;overflow-wrap:anywhere}
+.emp-paper{background:#fff;border:1px solid #e9ebee;border-radius:17px;padding:22px;margin-bottom:17px;box-shadow:0 5px 18px #29313b07}
+.emp-paper p{color:#69737e;font-size:14px;line-height:1.6;margin:9px 0}
+.emp-paper>small{display:block;margin-top:14px}
+.emp-paper form{display:grid;gap:15px;max-width:540px}
+.emp-paper form label{display:grid;gap:5px}
+.emp-clock{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.emp-clock button{min-width:145px}
+.emp-clock button:last-child{background:#394955}
+.emp-line{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:15px 0;border-bottom:1px solid #eceef0;font-size:14px}
+.emp-line b{font-weight:600;font-size:13px;color:#4d5662;text-align:right}
+.emp-line:last-child{border-bottom:0}
+.emp-news{border-top:1px solid #e8ebee;padding:18px 0}
+.emp-news b{display:block;font-size:16px;color:#333}
+.emp-news small{display:block;margin:8px 0}
+.emp-news p{white-space:pre-wrap;color:#4f5b67}
+.emp-news button{margin-top:9px}
+.emp-preview{display:block;width:100px;height:110px;border-radius:15px;object-fit:cover;margin:14px 0}
+.emp-error,.emp-success{padding:13px;border-radius:9px;margin:12px 0;font-size:13px}
+.emp-error{background:#fff0f1;color:#a02a3d;border:1px solid #f2c9d0}
+.emp-success{background:#ecf9ee;color:#257043;border:1px solid #c1eacb}
+@media(max-width:820px){.emp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.emp-top>strong{font-size:15px}}
+@media(max-width:480px){.emp-main{padding:20px 13px 70px}.emp-intro h1{font-size:23px}.emp-intro button{padding:10px;font-size:12px}.emp-stats{gap:9px}.emp-stats article{padding:14px}.emp-stats article strong{font-size:19px}.emp-paper{padding:16px}.emp-top>strong{font-size:13px}.emp-id{gap:12px}.emp-line b{max-width:100%;overflow-wrap:anywhere}}
