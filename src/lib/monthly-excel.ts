@@ -79,7 +79,6 @@ export async function downloadMonthlyExcel(data:MonthlyExport){
  }
  overview.getCell("B8").numFmt='"₺"#,##0.00';
  overview.getCell("B11").numFmt="0.00";
- wb.worksheets.splice(0,0,...[]); // sheets remain named for easy navigation
  const buffer=await wb.xlsx.writeBuffer();
  const file=new Blob([new Uint8Array(buffer)],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
  const url=URL.createObjectURL(file);
