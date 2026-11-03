@@ -28,9 +28,9 @@ export default function ReportsPanel({sb,staff}: {sb:SupabaseClient;staff:Staff[
  const until=period==="daily"?selectedDay:period==="weekly"?nextDate(monday,6):nextDate(nextDate(monthStart,32).slice(0,7)+"-01",-1);
  const tomorrow=nextDate(until,1);
  const menu:{period:Period;title:string;items:{id:ReportKind;label:string}[]}[]=[
- {period:"daily",title:"Günlük",items:[{id:"entries",label:"Giriş - Çıkış Kayıtları"},{id:"hours",label:"Günlük Çalışma Süreleri"},{id:"late",label:"Geç Kalanlar"},{id:"early",label:"Erken Çıkanlar"},{id:"lateExit",label:"Geç Çıkanlar"},{id:"absent",label:"Gelmeyenler"},{id:"open",label:"Çıkış Yapmayanlar"},{id:"active",label:"Konumdaki Çalışanlar"},{id:"summary",label:"Çalışma Özeti"}]},
- {period:"weekly",title:"Haftalık",items:[{id:"weeklyHours",label:"Toplam Çalışma Süreleri"},{id:"times",label:"Giriş - Çıkış Saatleri"},{id:"late",label:"Geç Giriş Süreleri"},{id:"summary",label:"Çalışma Özeti"}]},
- {period:"monthly",title:"Aylık",items:[{id:"monthlyHours",label:"Toplam Çalışma Süreleri"},{id:"times",label:"Giriş - Çıkış Saatleri"},{id:"late",label:"Geç Giriş Süreleri"},{id:"early",label:"Geç Kalma - Erken Çıkma"},{id:"summary",label:"Çalışma Özeti"}]}
+ {period:"daily",title:"Günlük",items:[{id:"entries",label:"Giriş - Çıkış Kayıtları"},{id:"hours",label:"Günlük Çalışma Süreleri"},{id:"open",label:"Çıkış Yapmayanlar"},{id:"summary",label:"Çalışma Özeti"}]},
+ {period:"weekly",title:"Haftalık",items:[{id:"weeklyHours",label:"Toplam Çalışma Süreleri"},{id:"times",label:"Giriş - Çıkış Saatleri"},{id:"summary",label:"Çalışma Özeti"}]},
+ {period:"monthly",title:"Aylık",items:[{id:"monthlyHours",label:"Toplam Çalışma Süreleri"},{id:"times",label:"Giriş - Çıkış Saatleri"},{id:"summary",label:"Çalışma Özeti"}]}
  ];
  useEffect(()=>{
    if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(until))return;
