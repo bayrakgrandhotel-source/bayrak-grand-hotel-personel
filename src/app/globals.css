@@ -96,3 +96,44 @@
 .report-plans-list{display:grid;gap:7px}.report-plans-list>div{border-top:1px solid #5b452e;padding:9px 2px;font-size:12px}
 @media(max-width:870px){.reports-layout{grid-template-columns:1fr}.report-menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.report-menu-group{border:0;padding:0}}
 @media(max-width:650px){.report-menu{display:block}.report-menu-group{border-bottom:1px solid #4e3b2b;padding:7px 0}.report-filters{grid-template-columns:1fr 1fr}.report-filters button{grid-column:1/-1}.report-stats span{padding:10px;font-size:11px}.report-stats b{font-size:16px}.report-plan-form{grid-template-columns:1fr}}
+
+
+/* Manager dashboard — dark coffee, gold and responsive fixed side navigation */
+.shell-manager{max-width:none;margin-left:252px;padding:30px clamp(15px,3vw,48px) 90px}
+.manager-sidebar{position:fixed;left:0;top:0;bottom:0;width:246px;background:#211910;border-right:1px solid #654727;z-index:25;display:flex;flex-direction:column;padding:21px 13px 16px;overflow-y:auto}
+.sidebar-brand{display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:22px;margin-bottom:12px;border-bottom:1px solid #604731;text-align:center}
+.sidebar-brand img{height:82px;width:60px;object-fit:contain}
+.sidebar-brand strong{color:#d8b27a;font:14px Georgia,serif;letter-spacing:.4px}
+.sidebar-brand small{font-size:11px;color:#ad9779}
+.manager-sidebar nav{display:grid;gap:4px;align-content:start}
+.manager-sidebar .side-link{display:flex;align-items:center;text-align:left;gap:12px;background:transparent;color:#dcc9aa;border:1px solid transparent;border-radius:8px;font-size:14px;font-weight:500;padding:12px 13px}
+.manager-sidebar .side-link:hover{background:#3b2c1d}
+.manager-sidebar .side-link.selected{background:#443322;color:#f3d49b;border-color:#8e6939;font-weight:700}
+.side-icon{width:20px;font-size:18px;color:#d2aa71;text-align:center;flex-shrink:0}
+.sidebar-logout{margin-top:auto;background:#65372e;color:#fff;border-radius:8px}
+.overview-heading{margin-bottom:21px}.overview-heading h2{font-size:26px;margin-bottom:4px}
+.overview-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:23px}
+.overview-card{text-align:left;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;min-height:144px;padding:21px;background:linear-gradient(130deg,#30231a,#221a14);border:1px solid #705037;border-radius:14px;color:#e5ceaf;box-shadow:0 6px 15px #0002}
+.overview-card:hover{background:#382a1e;transform:translateY(-1px)}
+.overview-card>span{font-size:14px;font-weight:600}.overview-card>strong{font-size:26px;color:#e7bf82;margin:13px 0;word-break:break-word}
+.overview-card>small{font-size:11px;color:#a99679}
+.overview-quick{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.staff-management{min-width:0}
+.staff-management-title{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:18px}
+.staff-management-title h2{font-size:25px}
+.staff-management-title .actions{max-width:100%}
+.staff-management-title .actions button{font-size:12px;padding:11px 12px}
+.staff-detail-form{display:grid;grid-template-columns:1fr 1fr;gap:17px 23px}
+.staff-detail-form>label{min-width:0}
+.staff-detail-form>h3{grid-column:1/-1;border-top:1px solid #675039;padding-top:16px;margin-top:10px}
+.staff-detail-form>button{justify-self:start}
+.staff-detail-form>label:first-child{grid-column:1/-1}
+.staff-detail-form textarea{display:block;width:100%;min-height:100px;background:#211910;border:1px solid #69543b;color:#f4e5d1;border-radius:10px;padding:12px;margin-top:6px;font:inherit}
+.staff-image-input{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;padding:12px;border:1px dashed #7e6041;border-radius:11px}
+.staff-image-input span{color:#c7b497;font-size:13px}
+.staff-image-input input[type=file]{width:auto;max-width:100%;margin:0;font-size:12px}
+.staff-list-tools{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.staff-list-tools input{max-width:340px;margin:0}
+@media(max-width:1080px){.overview-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.shell-manager{margin-left:215px}.manager-sidebar{width:210px}.manager-sidebar .side-link{font-size:13px;padding:10px}}
+@media(max-width:750px){.manager-sidebar{position:relative;top:auto;left:auto;bottom:auto;width:100%;padding:12px;max-height:none;border-bottom:1px solid #705436;border-right:0}.sidebar-brand{display:none}.manager-sidebar nav{display:flex;overflow-x:auto;gap:6px;padding-bottom:5px}.manager-sidebar .side-link{white-space:nowrap;flex-shrink:0;padding:10px}.sidebar-logout{display:none}.shell-manager{margin-left:0;padding:18px 12px 65px}.overview-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.overview-card{min-height:120px;padding:13px}.overview-card>strong{font-size:23px}.staff-detail-form{grid-template-columns:1fr}.staff-management-title .actions{gap:6px}}
+@media(max-width:420px){.overview-card>strong{font-size:19px}.overview-card>span{font-size:12px}.overview-card>small{font-size:10px}}
