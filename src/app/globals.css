@@ -363,3 +363,9 @@ table td{color:#493625}
 .emp-error{background:#FFF1F0;color:#963B33;border-color:#E7C6BE}
 .emp-success{background:#EFF8F0;color:#276B45;border-color:#BFDCC6}
 @media(max-width:480px){.emp-top-brand strong{font-size:12px}.emp-top-brand img{width:24px;height:37px}}
+
+
+/* Consistent outline icons for user and notification menu entries */
+.manager-sidebar .side-icon{display:inline-flex;align-items:center;justify-content:center}
+.manager-sidebar .side-icon svg,.emp-drawer .emp-nav-symbol svg,.bell-button svg{display:block;flex-shrink:0}
+.bell-button>span:first-child{display:inline-flex;align-items:center;justify-content:center}
