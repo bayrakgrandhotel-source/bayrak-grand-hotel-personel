@@ -137,3 +137,13 @@
 @media(max-width:1080px){.overview-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.shell-manager{margin-left:215px}.manager-sidebar{width:210px}.manager-sidebar .side-link{font-size:13px;padding:10px}}
 @media(max-width:750px){.manager-sidebar{position:relative;top:auto;left:auto;bottom:auto;width:100%;padding:12px;max-height:none;border-bottom:1px solid #705436;border-right:0}.sidebar-brand{display:none}.manager-sidebar nav{display:flex;overflow-x:auto;gap:6px;padding-bottom:5px}.manager-sidebar .side-link{white-space:nowrap;flex-shrink:0;padding:10px}.sidebar-logout{display:none}.shell-manager{margin-left:0;padding:18px 12px 65px}.overview-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.overview-card{min-height:120px;padding:13px}.overview-card>strong{font-size:23px}.staff-detail-form{grid-template-columns:1fr}.staff-management-title .actions{gap:6px}}
 @media(max-width:420px){.overview-card>strong{font-size:19px}.overview-card>span{font-size:12px}.overview-card>small{font-size:10px}}
+
+
+/* Company settings: concise, comfortable manager contact form */
+.company-settings-panel{max-width:920px}
+.company-settings-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px;margin-top:23px}
+.company-settings-form label{font-size:14px;color:#e9c793;font-weight:600}
+.company-settings-form input{margin-top:8px;background:#1d1713;border-color:#795a36;font-size:15px}
+.company-settings-footer{grid-column:1/-1;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-top:1px solid #58422c;padding-top:19px}
+.company-settings-footer p{font-size:12px}
+@media(max-width:620px){.company-settings-form{grid-template-columns:1fr}.company-settings-footer{flex-direction:column;align-items:stretch}.company-settings-footer button{width:100%}}
