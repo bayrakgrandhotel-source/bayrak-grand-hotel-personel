@@ -30,3 +30,19 @@
 .day-folder .table-wrap{padding:4px 12px 12px}
 .day-folder table{min-width:580px}
 @media(max-width:600px){.day-folder summary{padding:13px 11px}.day-title{font-size:14px}.day-folder .table-wrap{padding:2px 9px 9px}.day-count{font-size:11px}}
+
+
+/* Compact monthly staff report */
+.month-filters{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,2fr) auto;align-items:end;gap:14px;margin:20px 0 25px}
+.month-filters button{min-height:44px;white-space:nowrap}
+.monthly-heading{margin:10px 0 18px;color:#efcb93}
+.monthly-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.monthly-stats>div{border:1px solid #695136;background:#1d1712;padding:17px;border-radius:13px;display:flex;flex-direction:column;gap:8px}
+.monthly-stats span{color:#c7af8d;font-size:13px}.monthly-stats strong{font-size:24px;color:#ebc285;line-height:1.15}
+.monthly-stats small{color:#a99880;font-size:12px}
+.monthly-section{border-top:1px solid #5e4730;padding-top:20px;margin-top:22px}
+.monthly-section h3{margin-bottom:12px}
+.monthly-section table{min-width:570px}
+.monthly-section tfoot th{background:#30271d;font-weight:700;color:#e9c68e}
+@media(max-width:750px){.month-filters{grid-template-columns:1fr 1fr}.month-filters button{grid-column:1/-1}.monthly-stats{grid-template-columns:1fr}.monthly-stats>div{padding:13px}.monthly-stats strong{font-size:22px}}
+@media(max-width:450px){.month-filters{grid-template-columns:1fr}.month-filters button{grid-column:auto}}
