@@ -28,14 +28,17 @@ export default function CompanySettings({sb,managerId,managerName}:{
 
  useEffect(()=>{
   let alive=true;
-  sb.from("hotel_company_settings")
-   .select("company_name,manager_name,manager_email,manager_phone").eq("id",1).maybeSingle()
-   .then(({data,error:loadError})=>{
+  async function load(){
+   try{
+    const {data,error:loadError}=await sb.from("hotel_company_settings")
+     .select("company_name,manager_name,manager_email,manager_phone").eq("id",1).maybeSingle();
     if(!alive)return;
-    if(loadError){setError("Ayarlar yüklenemedi: "+loadError.message);return;}
+    if(loadError)throw loadError;
     if(data){setForm({company_name:data.company_name,manager_name:data.manager_name,manager_email:data.manager_email,manager_phone:data.manager_phone});setSaved(true);}
-   }).catch(err=>{if(alive)setError(err instanceof Error?err.message:"Ayarlar yüklenemedi.")})
-   .finally(()=>{if(alive)setLoading(false)});
+   }catch(err){if(alive)setError(err instanceof Error?err.message:"Ayarlar yüklenemedi.");}
+   finally{if(alive)setLoading(false);}
+  }
+  void load();
   return()=>{alive=false};
  },[sb,managerId]);
 
