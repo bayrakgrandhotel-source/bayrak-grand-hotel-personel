@@ -12,7 +12,9 @@ type Shift={id:string;staff_id:string;work_date:string;check_in:string;check_out
 type Advance={id:string;staff_id:string;advance_date:string;amount:number;note:string|null};
 type DayOff={id:string;staff_id:string;leave_date:string;note:string|null};
 type HotelWifi={id:string;ip:string;created_at:string};
-type Tab="personel"|"mesai"|"avans"|"izin"|"aylik";
+type Announcement={id:string;title:string;body:string;created_at:string;created_by:string};
+type AnnouncementRead={announcement_id:string;staff_id:string;read_at:string};
+type Tab="personel"|"mesai"|"avans"|"izin"|"aylik"|"duyurular";
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const stamp=(value:string|null)=>value?new Date(value).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
 const tl=(v:number)=>Number(v||0).toLocaleString("tr-TR",{style:"currency",currency:"TRY"});
@@ -26,6 +28,9 @@ export default function Home(){
  const [advances,setAdvances]=useState<Advance[]>([]);
  const [daysOff,setDaysOff]=useState<DayOff[]>([]);
  const [wifiNetworks,setWifiNetworks]=useState<HotelWifi[]>([]);
+ const [announcements,setAnnouncements]=useState<Announcement[]>([]);
+ const [announcementReads,setAnnouncementReads]=useState<AnnouncementRead[]>([]);
+ const [sendingAnnouncement,setSendingAnnouncement]=useState(false);
  const [tab,setTab]=useState<Tab>("mesai");
  const [monthlyMonth,setMonthlyMonth]=useState(day().slice(0,7));
  const [monthlyStaff,setMonthlyStaff]=useState("");
@@ -63,12 +68,12 @@ export default function Home(){
    if(pErr||!me||!me.active){await sb.auth.signOut();setProfile(null);setLoading(false);tell("Hesap bulunamadı veya pasif durumda.",true);return}
    const isManager=me.role==="manager";
    const p=isManager?sb.from("hotel_profiles").select("*"):sb.from("hotel_profiles").select("*").eq("id",user.id);
-   const results=await Promise.all([p,sb.from("hotel_attendance").select("*").order("check_in",{ascending:false}).limit(400),sb.from("hotel_advances").select("*").order("advance_date",{ascending:false}).limit(400),sb.from("hotel_days_off").select("*").order("leave_date",{ascending:false}).limit(400)]);
+   const results=await Promise.all([p,sb.from("hotel_attendance").select("*").order("check_in",{ascending:false}).limit(400),sb.from("hotel_advances").select("*").order("advance_date",{ascending:false}).limit(400),sb.from("hotel_days_off").select("*").order("leave_date",{ascending:false}).limit(400),sb.from("hotel_announcements").select("*").order("created_at",{ascending:false}).limit(100),sb.from("hotel_announcement_reads").select("announcement_id,staff_id,read_at").eq("staff_id",user.id).limit(200)]);
    const problem=results.find(x=>x.error)?.error;
    if(problem)throw Error(problem.message);
    if(isManager){const {data:wifi,error:wifiErr}=await sb.from("hotel_wifi_networks").select("id,ip,created_at").order("created_at",{ascending:false});if(wifiErr)throw wifiErr;setWifiNetworks(wifi as HotelWifi[]||[])}else setWifiNetworks([]);
    setProfile(me as Profile);setUsers(results[0].data as Profile[]||[]);
-   setShifts(results[1].data as Shift[]||[]);setAdvances(results[2].data as Advance[]||[]);setDaysOff(results[3].data as DayOff[]||[]);
+   setShifts(results[1].data as Shift[]||[]);setAdvances(results[2].data as Advance[]||[]);setDaysOff(results[3].data as DayOff[]||[]);setAnnouncements(results[4].data as Announcement[]||[]);setAnnouncementReads(results[5].data as AnnouncementRead[]||[]);
    setLoading(false);
  }
  useEffect(()=>{
@@ -128,9 +133,39 @@ export default function Home(){
    try{await api({action:"bootstrap",...d});setSetup(false);window.history.replaceState({},'','/');tell("Yönetici hesabı oluşturuldu. Artık giriş yapabilirsiniz.")}
    catch(err){handleError(err)}finally{setBusy(false)}
  }
- async function logout(){await sb.auth.signOut();setProfile(null);tell("");setTab("mesai")}
+
+ async function sendAnnouncement(e:FormEvent<HTMLFormElement>){
+   e.preventDefault();
+   if(profile?.role!=="manager")return;
+   const form=e.currentTarget;
+   const d=values(e);
+   const title=String(d.title||"").trim(),body=String(d.body||"").trim();
+   if(title.length<3||title.length>120||body.length<2||body.length>3000){tell("Duyuru başlığını ve mesajını kontrol edin.",true);return}
+   setSendingAnnouncement(true);tell("");
+   try{
+     const {error}=await sb.from("hotel_announcements").insert({title,body,created_by:profile.id});
+     if(error)throw error;form.reset();
+     await refresh();tell("Genel duyuru tüm personellerin uygulamasına gönderildi.");
+   }catch(err){handleError(err)}finally{setSendingAnnouncement(false)}
+ }
+ async function markAnnouncementRead(id:string){
+   if(!profile)return;
+   if(announcementReads.some(r=>r.announcement_id===id))return;
+   try{
+     const {error}=await sb.from("hotel_announcement_reads").upsert({announcement_id:id,staff_id:profile.id},{onConflict:"announcement_id,staff_id",ignoreDuplicates:true});
+     if(error)throw error;
+     setAnnouncementReads(prev=>[...prev,{announcement_id:id,staff_id:profile.id,read_at:new Date().toISOString()}]);
+   }catch(err){handleError(err)}
+ }
+ async function deleteAnnouncement(id:string){
+   if(profile?.role!=="manager")return;
+   if(!confirm("Bu genel duyuru tüm personellerin ekranından silinsin mi?"))return;
+   await doTask(async()=>{const {data,error}=await sb.from("hotel_announcements").delete().eq("id",id).select("id");if(error)throw error;if(!data?.length)throw Error("Duyuru silinemedi.")},"Duyuru silindi.");
+ }
+ async function logout(){await sb.auth.signOut();setProfile(null);setAnnouncements([]);setAnnouncementReads([]);tell("");setTab("mesai")}
  function chooseTab(t:Tab){setTab(t);setEditShift(null);setEditAdvance(null);setEditDay(null);tell("")}
  const staff=users.filter(p=>p.role==="staff");
+ const unreadAnnouncementCount=announcements.filter(a=>!announcementReads.some(r=>r.announcement_id===a.id)).length;
  const label=(id:string)=>users.find(p=>p.id===id)?.full_name||"Personel";
  const options=staff.map(s=><option key={s.id} value={s.id}>{s.full_name} ({s.username})</option>);
  const ownOpen=shifts.find(s=>s.staff_id===profile?.id&&!s.check_out);
@@ -151,9 +186,9 @@ export default function Home(){
    </form>:<form onSubmit={login}><label>Kullanıcı Adı<input name="username" autoComplete="username" required placeholder="Kullanıcı adınız"/></label><label>Şifre<input type="password" name="password" autoComplete="current-password" required placeholder="Şifreniz"/></label><button disabled={busy}>Giriş Yap</button></form>}
    {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
    <footer>TRABZON · Güvenli Personel Girişi</footer></div></main>;
- return <><header className="top"><span className="top-brand"><img src="/bayrak-logo-new.png" alt="Bayrak Grand Hotel logosu" className="hotel-logo-small"/><strong>BAYRAK GRAND HOTEL</strong></span><button className="secondary" onClick={logout}>Çıkış Yap</button></header><main className="shell">
+ return <><header className="top"><span className="top-brand"><img src="/bayrak-logo-new.png" alt="Bayrak Grand Hotel logosu" className="hotel-logo-small"/><strong>BAYRAK GRAND HOTEL</strong></span><div className="top-actions"><button className="bell-button" type="button" title="Bildirimler" aria-label={"Bildirimler, "+unreadAnnouncementCount+" okunmamış"} onClick={()=>chooseTab("duyurular")}><span aria-hidden="true">🔔</span>{unreadAnnouncementCount>0&&<span className="bell-count">{unreadAnnouncementCount>99?"99+":unreadAnnouncementCount}</span>}</button><button className="secondary" onClick={logout}>Çıkış Yap</button></div></header><main className="shell">
  <div className="welcome"><div><h1>Merhaba, {profile.full_name}</h1><p className="muted">{manager?"Yönetici Paneli":"Personel Paneli"}</p></div><button className="secondary" onClick={()=>doTask(refresh,"Kayıtlar yenilendi.")} disabled={busy}>Yenile</button></div>
- <div className="tabs">{(manager?[["personel","Personeller"],["mesai","Giriş / Çıkış"],["avans","Avanslar"],["izin","Haftalık İzinler"],["aylik","Aylık İşlemler"]]:[["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"]]).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id as Tab)}>{name}</button>)}</div>
+ <div className="tabs">{(manager?[["personel","Personeller"],["mesai","Giriş / Çıkış"],["avans","Avanslar"],["izin","Haftalık İzinler"],["aylik","Aylık İşlemler"],["duyurular","Duyurular"]]:[["mesai","Giriş / Çıkış"],["avans","Avanslarım"],["izin","İzinlerim"],["duyurular","Bildirimler"]]).map(([id,name])=><button key={id} className={tab===id?"active":""} onClick={()=>chooseTab(id as Tab)}>{name}</button>)}</div>
  {error&&<div className="error">{error}</div>}{success&&<div className="success">{success}</div>}
  {manager&&tab==="personel"&&<section className="panel"><h2>Otel Wi-Fi Ağını Tanımla</h2><p className="muted">Personeller yalnızca tanımladığınız otel ağından mesai giriş ve çıkışı yapabilir. Bu işlemi yaparken telefonunuzun veya bilgisayarınızın otelin Wi-Fi ağına bağlı olduğundan emin olun.</p><div className="actions" style={{marginTop:14}}><button disabled={busy} onClick={()=>doTask(async()=>{const {data,error}=await sb.rpc("hotel_register_wifi");if(error)throw error;if(!data)throw Error("Ağ bilgisi alınamadı")}, "Otel Wi-Fi ağı tanımlandı.")}>Bu Wi-Fi Ağını Tanımla</button></div>{wifiNetworks.length>0?<div style={{marginTop:12}}>{wifiNetworks.map(w=><div className="row" key={w.id}><span>Tanımlı Ağ: <b>{w.ip}</b></span><button className="danger" disabled={busy} onClick={()=>{if(confirm("Bu Wi-Fi ağı kaldırılacak. Bu ağdan mesai yapılamayacak. Devam edilsin mi?"))doTask(async()=>{const {error}=await sb.rpc("hotel_remove_wifi",{p_id:w.id});if(error)throw error},"Wi-Fi ağı kaldırıldı.")}}>Kaldır</button></div>)}</div>:<p className="hint">Henüz otel Wi-Fi ağı tanımlanmadı. Tanımlanana kadar personel mesai giriş-çıkışı kapalıdır.</p>}</section>}
  {manager&&tab==="personel"&&<div className="grid"><section className="panel"><h2>Personel Ekle</h2><form onSubmit={e=>{e.preventDefault();const d=values(e);doTask(()=>api({action:"create_staff",...d}),"Personel hesabı oluşturuldu.")}}>
@@ -216,6 +251,34 @@ export default function Home(){
     </section>
    </>}
   </>}
+ </section>}
+
+ {tab==="duyurular"&&<section className="panel announcements-panel">
+   <h2>🔔 {manager?"Genel Duyurular":"Bildirimlerim"} {unreadAnnouncementCount>0&&<span className="notifications-unread">{unreadAnnouncementCount} yeni</span>}</h2>
+   <p className="muted">Buradaki duyurular uygulama üzerinden paylaşılır. Yeni bir mesaj varsa zil simgesindeki sayı artar.</p>
+   {manager&&<section className="announcement-compose">
+     <h3>Personele Genel Mesaj Gönder</h3>
+     <form onSubmit={sendAnnouncement}>
+       <label>Başlık<input name="title" type="text" minLength={3} maxLength={120} placeholder="Örn. Yarınki vardiyalar" required/></label>
+       <label>Mesaj<textarea name="body" rows={5} minLength={2} maxLength={3000} placeholder="Tüm personele göndermek istediğiniz duyuru..." required/></label>
+       <button disabled={sendingAnnouncement}>{sendingAnnouncement?"Gönderiliyor...":"Tüm Personele Gönder"}</button>
+     </form>
+   </section>}
+   <h3>Gönderilen Mesajlar</h3>
+   {announcements.length===0?<p className="muted">Henüz duyuru yok.</p>:
+   <div className="announcements-list">{announcements.map(a=>{
+     const isRead=announcementReads.some(r=>r.announcement_id===a.id);
+     return <article className={"announcement-item "+(!isRead?"announcement-new":"")} key={a.id}>
+       <div className="announcement-title"><strong>{a.title}</strong>{!isRead&&<span className="notifications-unread">Yeni</span>}</div>
+       <small className="muted">{stamp(a.created_at)}</small>
+       <p className="announcement-body">{a.body}</p>
+       <div className="actions">
+       {!isRead&&<button className="secondary" onClick={()=>markAnnouncementRead(a.id)}>Okundu Olarak İşaretle</button>}
+       {isRead&&<small className="muted">✓ Okundu</small>}
+       {manager&&<button className="danger" onClick={()=>deleteAnnouncement(a.id)}>Sil</button>}
+       </div>
+     </article>
+   })}</div>}
  </section>}
  <p className="foot">Bayrak Grand Hotel · Trabzon · Personel Takip Sistemi</p></main></>;
 }
