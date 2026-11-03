@@ -85,7 +85,7 @@ export default function Home(){
    if(tab!=="aylik"||profile?.role!=="manager")return;
    const id=monthlyStaff||users.find(u=>u.role==="staff")?.id||"";
    if(!id){setMonthlyShifts([]);setMonthlyAdvances([]);setMonthlyDaysOff([]);return;}
-   if(!/^\\d{4}-\\d{2}$/.test(monthlyMonth)){setMonthlyError("Lütfen geçerli bir ay seçin.");return;}
+   if(!/^\d{4}-\d{2}$/.test(monthlyMonth)){setMonthlyError("Lütfen geçerli bir ay seçin.");return;}
    const first=monthlyMonth+"-01";
    const d=new Date(first+"T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+1);
    const next=d.toISOString().slice(0,10);
@@ -137,7 +137,7 @@ export default function Home(){
  const totalHours=shifts.filter(s=>s.staff_id===profile?.id&&s.check_out&&s.work_date.slice(0,7)===day().slice(0,7)).reduce((sum,s)=>sum+(new Date(s.check_out!).getTime()-new Date(s.check_in).getTime())/3600000,0);
  const monthlyTotal=monthlyAdvances.reduce((sum,a)=>sum+Number(a.amount),0);
  const monthlyHours=monthlyShifts.reduce((sum,s)=>sum+(s.check_out?Math.max(0,(new Date(s.check_out).getTime()-new Date(s.check_in).getTime())/3600000):0),0);
- const monthTitle=/^\\d{4}-\\d{2}$/.test(monthlyMonth)?new Intl.DateTimeFormat("tr-TR",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(monthlyMonth+"-01T12:00:00Z")):monthlyMonth;
+ const monthTitle=/^\d{4}-\d{2}$/.test(monthlyMonth)?new Intl.DateTimeFormat("tr-TR",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(monthlyMonth+"-01T12:00:00Z")):monthlyMonth;
  const shiftsByDate=Object.entries(shifts.reduce<Record<string,Shift[]>>((groups,s)=>{(groups[s.work_date]??=[]).push(s);return groups;},{})).sort(([a],[b])=>b.localeCompare(a));
  const renderShiftTable=(records:Shift[])=><div className="table-wrap"><table><thead><tr>{manager&&<th>Personel</th>}<th>Giriş</th><th>Çıkış</th><th>Süre</th>{manager&&<th>İşlem</th>}</tr></thead><tbody>{records.map(s=><tr key={s.id}>{manager&&<td>{label(s.staff_id)}</td>}<td>{stamp(s.check_in)}</td><td>{stamp(s.check_out)}</td><td>{s.check_out?((new Date(s.check_out).getTime()-new Date(s.check_in).getTime())/3600000).toFixed(1)+" sa":"—"}</td>{manager&&<td><div className="actions"><button className="secondary" onClick={()=>setEditShift(s)}>Düzenle</button><button className="danger" disabled={busy} onClick={()=>{if(confirm(label(s.staff_id)+" adlı personelin "+stamp(s.check_in)+" tarihli mesai giriş ve çıkış kaydı tamamen silinsin mi? Bu işlem geri alınamaz."))doTask(async()=>{const {data,error}=await sb.from("hotel_attendance").delete().eq("id",s.id).select("id");if(error)throw error;if(!data||data.length!==1)throw Error("Kayıt silinemedi. Yönetici yetkinizi kontrol edin.")},"Mesai kaydı silindi.")}}>Sil</button></div></td>}</tr>)}</tbody></table></div>;
  if(loading)return <div className="auth-wrap"><div className="auth-card"><img src="/bayrak-logo-new.png" alt="Bayrak Grand Hotel logosu" className="hotel-logo hotel-logo-loading"/><p className="sub">Uygulama açılıyor...</p></div></div>;
