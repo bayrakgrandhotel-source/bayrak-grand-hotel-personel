@@ -5,8 +5,8 @@ type Staff={id:string;full_name:string;active:boolean};
 type Log={id:string;staff_id:string;work_date:string;check_in:string;check_out:string|null};
 type Plan={id:string;staff_id:string;work_date:string;planned_start:string;planned_end:string;note:string};
 type Period="daily"|"weekly"|"monthly";
-type ReportKind="entries"|"hours"|"late"|"early"|"absent"|"open"|"active"|"summary"|"times"|"weeklyHours"|"monthlyHours";
-type ReportRow={id:string;staff:string;staffId:string;date:string;entry:string;exit:string;hours:number;status:string;expected:string;lateMin:number;earlyMin:number;planned:boolean;dayOff:boolean};
+type ReportKind="entries"|"hours"|"late"|"early"|"absent"|"lateExit"|"open"|"active"|"summary"|"times"|"weeklyHours"|"monthlyHours";
+type ReportRow={id:string;staff:string;staffId:string;date:string;entry:string;exit:string;hours:number;status:string;expected:string;lateMin:number;earlyMin:number;lateExitMin:number;planned:boolean;dayOff:boolean};
 const dateTR=(iso:string)=>iso.split("-").reverse().join(".");
 const hm=(iso:string|null)=>iso?new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso)):"—";
 const minutes=(time:string)=>{const p=time.slice(0,5).split(":").map(Number);return p[0]*60+p[1]};
@@ -28,7 +28,7 @@ export default function ReportsPanel({sb,staff}: {sb:SupabaseClient;staff:Staff[
  const until=period==="daily"?selectedDay:period==="weekly"?nextDate(monday,6):nextDate(nextDate(monthStart,32).slice(0,7)+"-01",-1);
  const tomorrow=nextDate(until,1);
  const menu:{period:Period;title:string;items:{id:ReportKind;label:string}[]}[]=[
- {period:"daily",title:"Günlük",items:[{id:"entries",label:"Giriş - Çıkış Kayıtları"},{id:"hours",label:"Günlük Çalışma Süreleri"},{id:"late",label:"Geç Kalanlar"},{id:"early",label:"Erken Çıkanlar"},{id:"absent",label:"Gelmeyenler"},{id:"open",label:"Çıkış Yapmayanlar"},{id:"active",label:"Konumdaki Çalışanlar"},{id:"summary",label:"Çalışma Özeti"}]},
+ {period:"daily",title:"Günlük",items:[{id:"entries",label:"Giriş - Çıkış Kayıtları"},{id:"hours",label:"Günlük Çalışma Süreleri"},{id:"late",label:"Geç Kalanlar"},{id:"early",label:"Erken Çıkanlar"},{id:"lateExit",label:"Geç Çıkanlar"},{id:"absent",label:"Gelmeyenler"},{id:"open",label:"Çıkış Yapmayanlar"},{id:"active",label:"Konumdaki Çalışanlar"},{id:"summary",label:"Çalışma Özeti"}]},
  {period:"weekly",title:"Haftalık",items:[{id:"weeklyHours",label:"Toplam Çalışma Süreleri"},{id:"times",label:"Giriş - Çıkış Saatleri"},{id:"late",label:"Geç Giriş Süreleri"},{id:"summary",label:"Çalışma Özeti"}]},
  {period:"monthly",title:"Aylık",items:[{id:"monthlyHours",label:"Toplam Çalışma Süreleri"},{id:"times",label:"Giriş - Çıkış Saatleri"},{id:"late",label:"Geç Giriş Süreleri"},{id:"early",label:"Geç Kalma - Erken Çıkma"},{id:"summary",label:"Çalışma Özeti"}]}
  ];
@@ -56,23 +56,25 @@ export default function ReportsPanel({sb,staff}: {sb:SupabaseClient;staff:Staff[
      const expected=plan?plan.planned_start.slice(0,5)+" - "+plan.planned_end.slice(0,5):"—";
      const late=plan?Math.max(0,inMinutes-minutes(plan.planned_start)):0;
      const early=plan&&s.check_out?Math.max(0,minutes(plan.planned_end)-outMinutes):0;
+     const lateExit=plan&&s.check_out?Math.max(0,outMinutes-minutes(plan.planned_end)):0;
      const duration=s.check_out?Math.max(0,(new Date(s.check_out).getTime()-new Date(s.check_in).getTime())/3600000):0;
-     result.push({id:s.id,staff:person?.full_name||"Personel",staffId:s.staff_id,date:s.work_date,entry:hm(s.check_in),exit:hm(s.check_out),hours:duration,status:s.check_out?"Tamamlandı":"Çıkış bekleniyor",expected,lateMin:late,earlyMin:early,planned:!!plan,dayOff:off});
+     result.push({id:s.id,staff:person?.full_name||"Personel",staffId:s.staff_id,date:s.work_date,entry:hm(s.check_in),exit:hm(s.check_out),hours:duration,status:s.check_out?"Tamamlandı":"Çıkış bekleniyor",expected,lateMin:late,earlyMin:early,lateExitMin:lateExit,planned:!!plan,dayOff:off});
    }
    // Planned shift without attendance means a possible absence ONLY after work day has passed.
    const today=istanbulDate();
    for(const plan of plans){
      if(logs.has(plan.staff_id+"|"+plan.work_date)||plan.work_date>=today||leaveDates.some(d=>d.staff_id===plan.staff_id&&d.leave_date===plan.work_date))continue;
      const person=staff.find(u=>u.id===plan.staff_id);
-     result.push({id:plan.id+"-absent",staff:person?.full_name||"Personel",staffId:plan.staff_id,date:plan.work_date,entry:"—",exit:"—",hours:0,status:"Gelmedi (planlı)",expected:plan.planned_start.slice(0,5)+" - "+plan.planned_end.slice(0,5),lateMin:0,earlyMin:0,planned:true,dayOff:false});
+     result.push({id:plan.id+"-absent",staff:person?.full_name||"Personel",staffId:plan.staff_id,date:plan.work_date,entry:"—",exit:"—",hours:0,status:"Gelmedi (planlı)",expected:plan.planned_start.slice(0,5)+" - "+plan.planned_end.slice(0,5),lateMin:0,earlyMin:0,lateExitMin:0,planned:true,dayOff:false});
    }
    return result.filter(r=>staffId==="all"||r.staffId===staffId).sort((a,b)=>b.date.localeCompare(a.date)||a.staff.localeCompare(b.staff,"tr"));
  },[records,plans,leaveDates,staffId,staff]);
- const planRequired=["late","early","absent"].includes(kind);
+ const planRequired=["late","early","lateExit","absent"].includes(kind);
  const planCount=plans.filter(p=>staffId==="all"||p.staff_id===staffId).length;
  const filtered=rows.filter(r=>{
   if(kind==="late")return r.lateMin>0&&r.entry!=="—";
   if(kind==="early")return r.earlyMin>0&&r.exit!=="—";
+  if(kind==="lateExit")return r.lateExitMin>0&&r.exit!=="—";
   if(kind==="absent")return r.status==="Gelmedi (planlı)";
   if(kind==="open"||kind==="active")return r.status==="Çıkış bekleniyor";
   return kind==="hours"||kind==="weeklyHours"||kind==="monthlyHours"?r.entry!=="—":true;
@@ -131,8 +133,8 @@ export default function ReportsPanel({sb,staff}: {sb:SupabaseClient;staff:Staff[
      {(kind==="weeklyHours"||kind==="monthlyHours"||kind==="summary")&&<div className="report-people">{staff.filter(s=>staffId==="all"||s.id===staffId).map(s=>{
        const selected=filtered.filter(r=>r.staffId===s.id);return <div key={s.id}><span>{s.full_name}</span><strong>{fmt(selected.reduce((n,r)=>n+r.hours,0))} saat</strong></div>
      })}</div>}
-     <div className="table-wrap"><table className="reports-table"><thead><tr><th>Personel</th><th>Tarih</th><th>Giriş</th><th>Çıkış</th><th>Süre</th><th>Durum</th>{planRequired&&<th>Plan</th>}{kind==="late"&&<th>Geç (dk)</th>}{kind==="early"&&<th>Erken (dk)</th>}</tr></thead>
-     <tbody>{filtered.map(r=><tr key={r.id}><td>{r.staff}</td><td>{dateTR(r.date)}</td><td>{r.entry}</td><td>{r.exit}</td><td>{r.entry==="—"?"—":fmt(r.hours)+" sa"}</td><td>{r.status}</td>{planRequired&&<td>{r.expected}</td>}{kind==="late"&&<td>{r.lateMin}</td>}{kind==="early"&&<td>{r.earlyMin}</td>}</tr>)}</tbody></table>{filtered.length===0&&<p className="muted" style={{padding:15}}>Bu rapor için kayıt bulunmuyor.</p>}</div>
+     <div className="table-wrap"><table className="reports-table"><thead><tr><th>Personel</th><th>Tarih</th><th>Giriş</th><th>Çıkış</th><th>Süre</th><th>Durum</th>{planRequired&&<th>Plan</th>}{kind==="late"&&<th>Geç (dk)</th>}{kind==="early"&&<th>Erken (dk)</th>}{kind==="lateExit"&&<th>Geç Çıkış (dk)</th>}</tr></thead>
+     <tbody>{filtered.map(r=><tr key={r.id}><td>{r.staff}</td><td>{dateTR(r.date)}</td><td>{r.entry}</td><td>{r.exit}</td><td>{r.entry==="—"?"—":fmt(r.hours)+" sa"}</td><td>{r.status}</td>{planRequired&&<td>{r.expected}</td>}{kind==="late"&&<td>{r.lateMin}</td>}{kind==="early"&&<td>{r.earlyMin}</td>}{kind==="lateExit"&&<td>{r.lateExitMin}</td>}</tr>)}</tbody></table>{filtered.length===0&&<p className="muted" style={{padding:15}}>Bu rapor için kayıt bulunmuyor.</p>}</div>
     </>}
     <details className="report-plan" open={false}><summary>Vardiya Saatlerini Tanımla (Yönetici)</summary>
      <p className="muted">Geç kalma, erken çıkma ve gelmeme raporlarının hesaplanması için kişi ve gün bazında planlanan vardiya saatleri girilir.</p>
