@@ -369,3 +369,18 @@ table td{color:#493625}
 .manager-sidebar .side-icon{display:inline-flex;align-items:center;justify-content:center}
 .manager-sidebar .side-icon svg,.emp-drawer .emp-nav-symbol svg,.bell-button svg{display:block;flex-shrink:0}
 .bell-button>span:first-child{display:inline-flex;align-items:center;justify-content:center}
+
+
+/* Day-by-day staff attendance: unmistakable missed clock-outs */
+.emp-day-list{display:grid;gap:12px;margin-top:14px}
+.emp-day-card{background:#FFFCF7;border:1px solid #E8D9BE;border-radius:13px;padding:15px 17px}
+.emp-day-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:11px;margin-bottom:12px;border-bottom:1px solid #EADFCB}
+.emp-day-heading strong{color:#825C24;font-size:15px}
+.emp-day-heading span{font-size:11px;color:#A4844E}
+.emp-day-hours{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.emp-day-hours>div{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:7px}
+.emp-day-hours span{color:#7C6B53;font-size:12px}
+.emp-day-hours b{color:#3B2A1D;font-size:16px;font-weight:650;line-height:1.35}
+.emp-day-hours .emp-missing-exit{color:#A94438;font-size:13px;font-weight:700}
+.emp-day-hours .emp-pending-exit{color:#987333;font-size:13px;font-weight:650}
+@media(max-width:450px){.emp-day-card{padding:13px}.emp-day-hours{gap:10px}.emp-day-hours b{font-size:15px}.emp-day-hours .emp-missing-exit,.emp-day-hours .emp-pending-exit{font-size:12px}}
