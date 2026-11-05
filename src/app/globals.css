@@ -759,3 +759,38 @@ html[data-bgh-theme="dark"] .overview-cards .overview-card>span,
 html[data-bgh-theme="dark"] .overview-cards .overview-card>strong{color:#FFFFFF!important}
 html[data-bgh-theme="dark"] .overview-cards .overview-card>small{color:#F1F4F8!important}
 @media(prefers-reduced-motion:reduce){.overview-cards .overview-card:hover:not(:disabled){transform:none}}
+
+
+/* FIX: staff navigation icons must contrast with dark drawer surfaces.
+   Old light-mode icon tile stayed pale in black mode while text turned white. */
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button .emp-nav-symbol,
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button>span.emp-nav-symbol{
+  background:#374354!important;
+  color:#F7F9FC!important;
+  border:1px solid #52647A!important;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  opacity:1!important;
+}
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button.chosen .emp-nav-symbol,
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button.chosen>span.emp-nav-symbol{
+  background:#435879!important;
+  border-color:#7891B6!important;
+  color:#FFFFFF!important;
+}
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button .emp-nav-symbol svg,
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button .emp-nav-symbol svg *{
+  color:#F7F9FC!important;
+  stroke:currentColor;
+  opacity:1!important;
+}
+html[data-bgh-theme="dark"] .emp-app .emp-top>button{
+  color:#F7F9FC!important;
+  background:#374354!important;
+  border-color:#556579!important;
+}
+html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button em{
+  background:#B18A48!important;
+  color:#FFFFFF!important;
+}
