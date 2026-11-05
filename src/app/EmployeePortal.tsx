@@ -36,18 +36,11 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
  const [leaveDate,setLeaveDate]=useState(day()),[leaveReason,setLeaveReason]=useState(""),[leaves,setLeaves]=useState<Leave[]>([]),[plans,setPlans]=useState<Plan[]>([]);
  const [readIds,setReadIds]=useState<string[]>([]),[photo,setPhoto]=useState<File|null>(null),[photoUrl,setPhotoUrl]=useState("");
  const [currentPassword,setCurrentPassword]=useState(""),[newPassword,setNewPassword]=useState(""),[confirmPassword,setConfirmPassword]=useState("");
- const [whatsappOptIn,setWhatsappOptIn]=useState(false),[whatsappSaving,setWhatsappSaving]=useState(false);
  const en=lang==="en";
  const labels:{[key:string]:[string,string]}={home:["Anasayfa","Home"],leave:["İzin Talebi","Leave Request"],news:["Duyurular","Announcements"],account:["Hesabım","My Profile"],settings:["Ayarlar","Settings"],menu:["Menü","Menu"],other:["Diğer","Other"],logout:["Oturumu Kapat","Sign Out"],in:["Giriş Yap","Clock In"],out:["Çıkış Yap","Clock Out"],hours:["Aylık Çalışma","Monthly Hours"],advances:["Aylık Avans","Monthly Advances"],leaveDays:["İzin Günlerim","My Days Off"],record:["Mesai Kayıtlarım","Attendance Records"],shifts:["Vardiyalarım","My Shifts"],date:["Tarih","Date"],reason:["Açıklama","Reason"],send:["Talep Gönder","Submit Request"],requests:["Taleplerim","My Requests"],pending:["Beklemede","Pending"],approved:["Onaylandı","Approved"],rejected:["Reddedildi","Rejected"],password:["Şifre Değiştir","Change Password"],photo:["Profil Fotoğrafı","Profile Photo"],save:["Kaydet","Save"],language:["Dil Seçimi","Language"],refresh:["Yenile","Refresh"],read:["Okundu İşaretle","Mark Read"],guide:["Kullanım Kılavuzu","User Guide"]};
  const t=(name:string)=>labels[name]?.[en?1:0]||name;
  useEffect(()=>{try{setLang(localStorage.getItem("bgh-lang")==="en"?"en":"tr")}catch{}},[]);
  useEffect(()=>{setReadIds(reads.map(x=>x.announcement_id))},[reads]);
- useEffect(()=>{
-  let mounted=true;
-  sb.from("hotel_whatsapp_staff_consent").select("enabled").eq("staff_id",profile.id).maybeSingle()
-   .then(({data,error})=>{if(mounted&&!error)setWhatsappOptIn(Boolean(data?.enabled))});
-  return()=>{mounted=false};
- },[sb,profile.id]);
  useEffect(()=>{let alive=true;Promise.all([
  sb.from("hotel_leave_requests").select("id,leave_date,reason,status").eq("staff_id",profile.id).order("created_at",{ascending:false}).limit(100),
  sb.from("hotel_shift_plans").select("id,work_date,planned_start,planned_end").eq("staff_id",profile.id).gte("work_date",day()).order("work_date").limit(15)
@@ -64,37 +57,7 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
  const totalHours=shifts.filter(s=>s.work_date.startsWith(day().slice(0,7))&&s.check_out).reduce((n,s)=>n+(new Date(s.check_out!).getTime()-new Date(s.check_in).getTime())/3600000,0);
  const totalAdvance=advances.filter(a=>a.advance_date.startsWith(day().slice(0,7))).reduce((n,a)=>n+Number(a.amount),0);
  async function run(fn:()=>Promise<void>,ok:string){setBusy(true);setError("");setSuccess("");try{await fn();await onRefresh();setSuccess(ok)}catch(e){setError(e instanceof Error?e.message:"İşlem başarısız")}finally{setBusy(false)}}
- async function clock(action:"in"|"out"){
-  await run(async()=>{
-   const {data,error}=await sb.rpc(action==="in"?"hotel_clock_in":"hotel_clock_out");
-   if(error)throw error;
-   // The manager's Wi-Fi restriction and the attendance RPC remain authoritative.
-   // WhatsApp is an optional server-to-server follow-up, not part of saving attendance.
-   if(data?.id){
-    try{
-     const {data:{session}}=await sb.auth.getSession();
-     if(session)await fetch("https://wksbzfrpyrjzopoxnajc.supabase.co/functions/v1/hotel-whatsapp-attendance",{
-      method:"POST",
-      headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
-      body:JSON.stringify({attendance_id:data.id,action}),
-      signal:AbortSignal.timeout(12000)
-     });
-    }catch(err){console.warn("WhatsApp attendance setup unavailable",err)}
-   }
-  },en?"Saved.":action==="in"?"Giriş başarılı ✓":"Çıkış başarılı ✓");
- }
- async function saveWhatsappConsent(){
-  setWhatsappSaving(true);setError("");
-  try{
-   const next=!whatsappOptIn;
-   if(next&&!profile.phone)throw Error(en?"Please ask the manager to add your phone number first.":"Önce yöneticiden personel telefon numaranızı kaydetmesini isteyin.");
-   const {error}=await sb.rpc("hotel_set_staff_whatsapp_consent",{p_enabled:next});
-   if(error)throw error;
-   setWhatsappOptIn(next);
-   setSuccess(next?(en?"WhatsApp notifications enabled.":"WhatsApp bildirim izni kaydedildi."):(en?"WhatsApp notifications disabled.":"WhatsApp bildirimleri kapatıldı."));
-  }catch(err){setError(err instanceof Error?err.message:"İşlem başarısız")}
-  finally{setWhatsappSaving(false)}
- }
+ async function clock(action:"in"|"out"){await run(async()=>{const {error}=await sb.rpc(action==="in"?"hotel_clock_in":"hotel_clock_out");if(error)throw error},en?"Saved.":"İşlem kaydedildi ✓")}
  async function request(e:FormEvent<HTMLFormElement>){
  e.preventDefault();
  await run(async()=>{
@@ -148,13 +111,6 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
  {page==="leave"&&<><section className="emp-paper"><h2>{t("leave")}</h2><form onSubmit={request}><label>{t("date")}<input type="date" required min={day()} value={leaveDate} onChange={e=>setLeaveDate(e.target.value)}/></label><label>{t("reason")}<textarea minLength={3} maxLength={500} required rows={3} value={leaveReason} onChange={e=>setLeaveReason(e.target.value)}/></label><button disabled={busy}>{t("send")}</button></form></section><section className="emp-paper"><h2>{t("requests")}</h2>{leaves.map(l=><div className="emp-line" key={l.id}><span>{l.leave_date} — {l.reason}</span><b>{t(l.status)}</b></div>)}{leaves.length===0&&<p>—</p>}</section><section className="emp-paper"><h2>{t("leaveDays")}</h2>{daysOff.map(d=><div className="emp-line" key={d.id}><span>{d.leave_date}</span><b>{d.note||"—"}</b></div>)}{daysOff.length===0&&<p>—</p>}</section></>}
  {page==="news"&&<section className="emp-paper"><h2>{t("news")}</h2>{announcements.map(a=><article className="emp-news" key={a.id}><b>{a.title}</b><small>{time(a.created_at)}</small><p>{a.body}</p>{!readIds.includes(a.id)&&<button onClick={()=>void mark(a.id)} disabled={busy}>{t("read")}</button>}</article>)}{announcements.length===0&&<p>—</p>}</section>}
  {page==="account"&&<section className="emp-paper"><h2>{t("account")}</h2><div className="emp-id"><div className="emp-avatar">{photoUrl?<img src={photoUrl} alt=""/>:profile.full_name.charAt(0)}</div><b>{profile.full_name}</b></div>{([[en?"Name":"Ad Soyad",profile.full_name],[en?"Phone":"Telefon",profile.phone],[en?"Email":"E-posta",profile.contact_email],[en?"Employee No":"Sicil No",profile.employee_no],[en?"Department":"Departman",profile.department],[en?"Position":"Görev",profile.job_title],[en?"Working Hours":"Çalışma Saati",profile.work_schedule],[en?"Start Date":"İşe Başlama",profile.hire_date]] as [string,string|null|undefined][]).map(([k,v])=><div className="emp-line" key={k}><span>{k}</span><b>{v||"—"}</b></div>)}<p>{en?"Information is managed by your hotel manager.":"Hesap bilgilerinizi yönetici düzenler."}</p></section>}
- {page==="settings"&&<><section className="emp-paper"><ThemeToggle english={en}/></section>
- <section className="emp-paper">
-  <h2>{en?"WhatsApp Clock Notifications":"WhatsApp Giriş / Çıkış Bildirimleri"}</h2>
-  <p>{en?"With your permission, the company can notify you on WhatsApp after a successful clock in or clock out.":"Onay verirseniz giriş veya çıkış işleminiz başarıyla kaydedildikten sonra şirket WhatsApp hesabından kendi telefonunuza bildirim gönderilebilir."}</p>
-  <p><b>{en?"Your phone":"Kayıtlı numaranız"}:</b> {profile.phone||"—"}</p>
-  <p><small>{en?"Requires a configured company WhatsApp Business Platform. You can revoke permission at any time.":"Bu özellik için şirket WhatsApp Business Platform bağlantısı gerekir. İzni istediğiniz zaman kapatabilirsiniz."}</small></p>
-  <button disabled={whatsappSaving} className={whatsappOptIn?"secondary":""} onClick={()=>void saveWhatsappConsent()}>{whatsappSaving?"Kaydediliyor...":whatsappOptIn?(en?"Disable WhatsApp Notifications":"WhatsApp Bildirim İznini Kapat"):(en?"Allow WhatsApp Notifications":"WhatsApp Bildirimlerine İzin Ver")}</button>
- </section><section className="emp-paper"><h2>{t("language")}</h2><select value={lang} onChange={e=>{const v=e.target.value==="en"?"en":"tr";setLang(v);localStorage.setItem("bgh-lang",v)}}><option value="tr">Türkçe</option><option value="en">English</option></select></section><section className="emp-paper"><h2>{t("password")}</h2><form onSubmit={pass}><label>{en?"Current password":"Mevcut Şifre"}<input required type="password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)}/></label><label>{en?"New password":"Yeni Şifre"}<input required minLength={8} type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/></label><label>{en?"Confirm":"Yeni Şifre Tekrar"}<input required minLength={8} type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label><button disabled={busy}>{t("password")}</button></form></section><section className="emp-paper"><h2>{t("photo")}</h2>{photoUrl&&<img className="emp-preview" src={photoUrl} alt=""/>}<form onSubmit={upload}><input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setPhoto(e.target.files?.[0]||null)}/><small>JPG/PNG/WEBP, max 2 MB</small><button disabled={busy||!photo}>{t("save")}</button></form></section></>}
+ {page==="settings"&&<><section className="emp-paper"><ThemeToggle english={en}/></section><section className="emp-paper"><h2>{t("language")}</h2><select value={lang} onChange={e=>{const v=e.target.value==="en"?"en":"tr";setLang(v);localStorage.setItem("bgh-lang",v)}}><option value="tr">Türkçe</option><option value="en">English</option></select></section><section className="emp-paper"><h2>{t("password")}</h2><form onSubmit={pass}><label>{en?"Current password":"Mevcut Şifre"}<input required type="password" value={currentPassword} onChange={e=>setCurrentPassword(e.target.value)}/></label><label>{en?"New password":"Yeni Şifre"}<input required minLength={8} type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)}/></label><label>{en?"Confirm":"Yeni Şifre Tekrar"}<input required minLength={8} type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)}/></label><button disabled={busy}>{t("password")}</button></form></section><section className="emp-paper"><h2>{t("photo")}</h2>{photoUrl&&<img className="emp-preview" src={photoUrl} alt=""/>}<form onSubmit={upload}><input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setPhoto(e.target.files?.[0]||null)}/><small>JPG/PNG/WEBP, max 2 MB</small><button disabled={busy||!photo}>{t("save")}</button></form></section></>}
  </main></div>;
 }
