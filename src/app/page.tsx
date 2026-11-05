@@ -34,6 +34,7 @@ type HotelWifi={id:string;ip:string;created_at:string};
 type Announcement={id:string;title:string;body:string;created_at:string;created_by:string};
 type AnnouncementRead={announcement_id:string;staff_id:string;read_at:string};
 type ManagerLeaveNotification={id:string;leave_request_id:string;staff_id:string;title:string;message:string;created_at:string;read_at:string|null;email_sent_at:string|null};
+type WhatsappSettings={manager_id:string;boss_phone:string|null;boss_consent:boolean;boss_clock_in_enabled:boolean;staff_clock_in_enabled:boolean;staff_clock_out_enabled:boolean};
 type Tab="genel"|"personel"|"mesai"|"avans"|"izin"|"aylik"|"duyurular"|"raporlar"|"ayarlar";
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const stamp=(value:string|null)=>value?new Date(value).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
@@ -54,6 +55,13 @@ export default function Home(){
  const [sendingAnnouncement,setSendingAnnouncement]=useState(false);
  const [leaveNotices,setLeaveNotices]=useState<ManagerLeaveNotification[]>([]);
  const [emailSaving,setEmailSaving]=useState(false);
+ const [whatsappSaving,setWhatsappSaving]=useState(false);
+ const [whatsappSettings,setWhatsappSettings]=useState<WhatsappSettings|null>(null);
+ const [whatsappBossPhone,setWhatsappBossPhone]=useState("");
+ const [whatsappBossConsent,setWhatsappBossConsent]=useState(false);
+ const [whatsappBossIn,setWhatsappBossIn]=useState(true);
+ const [whatsappStaffIn,setWhatsappStaffIn]=useState(true);
+ const [whatsappStaffOut,setWhatsappStaffOut]=useState(true);
  const [tab,setTab]=useState<Tab>("mesai");
  const [monthlyMonth,setMonthlyMonth]=useState(day().slice(0,7));
  const [monthlyStaff,setMonthlyStaff]=useState("");
@@ -103,6 +111,24 @@ export default function Home(){
    setShifts(results[1].data as Shift[]||[]);setAdvances(results[2].data as Advance[]||[]);setDaysOff(results[3].data as DayOff[]||[]);setAnnouncements(results[4].data as Announcement[]||[]);setAnnouncementReads(results[5].data as AnnouncementRead[]||[]);
    setLoading(false);
  }
+ useEffect(()=>{
+  if(profile?.role!=="manager"){setWhatsappSettings(null);return;}
+  let live=true;
+  sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled")
+  .eq("manager_id",profile.id).maybeSingle().then(({data,error})=>{
+   if(!live||error)return;
+   const setting=(data as WhatsappSettings|null);
+   setWhatsappSettings(setting);
+   if(setting){
+    setWhatsappBossPhone(setting.boss_phone||"");
+    setWhatsappBossConsent(setting.boss_consent);
+    setWhatsappBossIn(setting.boss_clock_in_enabled);
+    setWhatsappStaffIn(setting.staff_clock_in_enabled);
+    setWhatsappStaffOut(setting.staff_clock_out_enabled);
+   }
+  });
+  return()=>{live=false};
+ },[profile?.id,profile?.role]);
  useEffect(()=>{
    if(profile?.role!=="manager"){setLeaveNotices([]);return;}
    let mounted=true;
@@ -227,6 +253,24 @@ export default function Home(){
    tell(raw?"Bildirim e-posta adresi kaydedildi. E-posta gönderim hizmetinin ayrıca yapılandırılması gerekir.":"Bildirim e-posta adresi kaldırıldı.");
   }catch(err){handleError(err)}finally{setEmailSaving(false)}
  }
+ async function saveWhatsappSettings(e:FormEvent<HTMLFormElement>){
+  e.preventDefault();
+  if(profile?.role!=="manager")return;
+  setWhatsappSaving(true);tell("");
+  try{
+   const {error}=await sb.rpc("hotel_save_whatsapp_manager_settings",{
+    p_boss_phone:whatsappBossPhone,
+    p_boss_consent:whatsappBossConsent,
+    p_boss_clock_in_enabled:whatsappBossIn,
+    p_staff_clock_in_enabled:whatsappStaffIn,
+    p_staff_clock_out_enabled:whatsappStaffOut
+   });
+   if(error)throw error;
+   const {data}=await sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled").eq("manager_id",profile.id).maybeSingle();
+   if(data){const s=data as WhatsappSettings;setWhatsappSettings(s);setWhatsappBossPhone(s.boss_phone||"");}
+   tell("WhatsApp bildirim tercihleri kaydedildi. Otomatik gönderim için Meta WhatsApp Business Platform bağlantısı ve onaylı mesaj şablonları ayrıca gereklidir.");
+  }catch(err){handleError(err)}finally{setWhatsappSaving(false)}
+ }
  async function logout(){await sb.auth.signOut();setProfile(null);setAnnouncements([]);setAnnouncementReads([]);setLeaveNotices([]);tell("");setTab("mesai")}
  function chooseTab(t:Tab){setTab(t);setEditShift(null);setEditAdvance(null);setEditDay(null);tell("")}
  const staff=users.filter(p=>p.role==="staff");
@@ -279,6 +323,34 @@ export default function Home(){
  {manager&&tab==="personel"&&<StaffManagement sb={sb} staff={staff} onCreate={async d=>await api({action:"create_staff",...d})} onSaved={refresh}/>}
  {manager&&tab==="personel"&&<section className="panel"><h2>Hesap Yönetimi</h2><p className="muted">Şifre yenileme ve aktif/pasif işlemleri sadece yönetici tarafından yapılabilir.</p>{staff.map(s=><div className="row" key={s.id}><div><b>{s.full_name}</b><p className="muted">@{s.username} · {s.active?"Aktif":"Pasif"}</p></div><div className="actions"><button className="secondary" onClick={()=>{const pass=prompt("Yeni şifre (en az 8 karakter):");if(pass)doTask(()=>api({action:"reset_password",id:s.id,password:pass}),"Şifre yenilendi.")}}>Şifreyi Yenile</button><button className={s.active?"danger":"secondary"} onClick={()=>{if(confirm(s.active?"Personel hesabı pasife alınsın mı?":"Personel hesabı aktifleştirilsin mi?"))doTask(()=>api({action:"set_active",id:s.id,active:!s.active}))}}>{s.active?"Pasife Al":"Aktifleştir"}</button></div></div>)}</section>}
  {manager&&tab==="ayarlar"&&<><CompanySettings sb={sb} managerId={profile.id} managerName={profile.full_name}/>
+ <section className="panel">
+ <h2>WhatsApp Mesai Bildirimleri</h2>
+ <p className="muted">Personel otel Wi-Fi üzerinden giriş yaptığında patronun telefonuna, personel giriş veya çıkış yaptığında ise izin vermiş personelin kendi WhatsApp numarasına şirket hesabından bildirim göndermek için ayarları kullanın.</p>
+ <form className="whatsapp-settings-form" onSubmit={saveWhatsappSettings}>
+ <label>Patron WhatsApp Numarası (ülke koduyla)
+ <input type="tel" inputMode="tel" value={whatsappBossPhone} maxLength={22} placeholder="905XXXXXXXXX" onChange={e=>setWhatsappBossPhone(e.target.value)}/>
+ </label>
+ <label className="whatsapp-check">
+ <input type="checkbox" checked={whatsappBossConsent} onChange={e=>setWhatsappBossConsent(e.target.checked)}/>
+ <span>Patron bu numaradan mesai WhatsApp bildirimlerini almayı kabul etti.</span>
+ </label>
+ <label className="whatsapp-check">
+ <input type="checkbox" checked={whatsappBossIn} onChange={e=>setWhatsappBossIn(e.target.checked)}/>
+ <span>Personel giriş yapınca patrona bildirim gönder</span>
+ </label>
+ <label className="whatsapp-check">
+ <input type="checkbox" checked={whatsappStaffIn} onChange={e=>setWhatsappStaffIn(e.target.checked)}/>
+ <span>Personel giriş yapınca kendi numarasına bildirim gönder</span>
+ </label>
+ <label className="whatsapp-check">
+ <input type="checkbox" checked={whatsappStaffOut} onChange={e=>setWhatsappStaffOut(e.target.checked)}/>
+ <span>Personel çıkış yapınca kendi numarasına bildirim gönder</span>
+ </label>
+ <button disabled={whatsappSaving}>{whatsappSaving?"Kaydediliyor...":"WhatsApp Ayarlarını Kaydet"}</button>
+ </form>
+ <p className="hint">Her personel ayrıca kendi Ayarlar sayfasından WhatsApp bildirimine onay vermelidir. Şirket telefonunun Meta WhatsApp Business Platform bağlantısı, API erişimi ve onaylı mesaj şablonları yapılmadan mesajlar otomatik gönderilemez.</p>
+ {whatsappSettings&&<p className="muted">Yönetici WhatsApp tercihleri kayıtlı.</p>}
+ </section>
  <section className="panel"><h2>İzin Talebi E-posta Bildirimleri</h2>
  <p className="muted">Personel izin talebi gönderdiğinde bildirim almak istediğiniz e-posta adresini buraya yazın. Uygulama içi izin bildirimleri bu ayardan bağımsız çalışır.</p>
  <form key={profile.id+":"+(profile.contact_email||"")} onSubmit={saveManagerEmail} style={{marginTop:14,maxWidth:480}}>
