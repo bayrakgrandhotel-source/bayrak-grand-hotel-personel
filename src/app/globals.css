@@ -574,3 +574,118 @@ table tfoot th{background:#F1F3F5;color:#171717}
 .emp-app .emp-error{color:#9E2B2E}
 .emp-app .emp-success{color:#1E6940}
 @media(prefers-reduced-motion:reduce){.emp-drawer,.overview-card{transition:none}}
+
+
+/* Color-mode settings: white/siyah buttons on all hotel screens */
+.bgh-theme-switch{display:grid;gap:9px;max-width:350px}
+.bgh-theme-heading{font-size:13px;font-weight:700;color:#202329}
+.bgh-theme-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;border:1px solid #DEE2E8;background:#F4F5F7;border-radius:12px}
+.bgh-theme-option{border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;color:#333B45!important;font-weight:600!important;min-height:40px;display:flex;gap:7px;align-items:center;justify-content:center;padding:8px!important;box-shadow:none!important}
+.bgh-theme-option.selected{background:#FFFFFF!important;color:#111111!important;border-color:#CBD3DC!important;box-shadow:0 1px 4px #00000013!important}
+.bgh-theme-option:focus-visible{outline:2px solid #BB9050!important;outline-offset:2px}
+.auth-card>.bgh-theme-switch{margin:18px auto 0;max-width:270px}
+.sidebar-theme{margin-top:auto;border-top:1px solid #E5E7EB;padding:15px 6px 10px}
+.sidebar-theme+.sidebar-logout{margin-top:4px}
+.emp-app .bgh-theme-option{background:transparent!important;color:#20242A!important;border-color:transparent!important}
+.emp-app .bgh-theme-option.selected{background:#FFFFFF!important;color:#171717!important;border-color:#C7CDD4!important}
+.emp-app .bgh-theme-options{margin-top:12px}
+
+/* Manager overview: distinct, easy-to-read shades with consistent structure. */
+.overview-card{position:relative;overflow:hidden;border-width:1px!important}
+.overview-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:5px 0 0 5px;background:var(--card-accent,#A7A7A7)}
+.overview-card.overview-card-arrivals{--card-accent:#23894E;background:linear-gradient(125deg,#DCF8E6 0%,#F0FFF5 100%)!important;border-color:#A8E4C0!important}
+.overview-card.overview-card-missing{--card-accent:#E39A25;background:linear-gradient(115deg,#FFE3C4 0%,#FFF4C5 48%,#DDF1FF 100%)!important;border-color:#E7CAA2!important}
+.overview-card.overview-card-staff{--card-accent:#A04FC5;background:linear-gradient(115deg,#FCE6F4 0%,#EFE3FF 100%)!important;border-color:#DDC0EF!important}
+.overview-card.overview-card-advance{--card-accent:#D04444;background:linear-gradient(115deg,#FFE2E2 0%,#FFF1F1 100%)!important;border-color:#E6BDBD!important}
+.overview-card.overview-card-leave{--card-accent:#284DA9;background:linear-gradient(115deg,#DEE8FF 0%,#F2F5FF 100%)!important;border-color:#B6C8ED!important}
+.overview-card.overview-card-announcements{--card-accent:#0C9696;background:linear-gradient(115deg,#D8F7F2 0%,#ECFAFA 100%)!important;border-color:#B1E5DF!important}
+.overview-cards .overview-card>span{color:#25282E!important}
+.overview-cards .overview-card>strong{color:#181A1D!important;font-size:clamp(24px,2.3vw,32px)}
+.overview-cards .overview-card>small{color:#3E4750!important}
+.overview-cards .overview-card:hover{filter:brightness(.985);box-shadow:0 7px 20px #0E141D10}
+.overview-cards .overview-card:focus-visible{outline:3px solid #A67C3E;outline-offset:2px}
+
+/* Dark mode applies across login, manager and staff without affecting business logic. */
+html[data-bgh-theme="dark"]{
+ color-scheme:dark!important;
+ --gold:#D4AD6C;--gold-dark:#C9A35A;--gold-light:#2B2B27;
+ --cream:#101317;--white:#1A1E24;--espresso:#F7F7F8;--brown:#E3E5E8;
+ --line:#313740;--shadow:0 5px 20px #00000024;
+ background:#101317!important;color:#F2F4F7!important
+}
+html[data-bgh-theme="dark"] body{background:#101317!important;background-image:none!important;color:#F2F4F7!important}
+html[data-bgh-theme="dark"] :is(.auth-wrap,.shell,.shell-manager,.overview-main,.staff-management,.report-main){background:#101317!important;color:#F2F4F7!important}
+html[data-bgh-theme="dark"] :is(.auth-card,.panel,.manager-sidebar,header.top,.day-folder,.monthly-stats>div,
+ .announcement-compose,.announcement-item,.report-menu,.report-plan,.report-people>div,
+ .staff-list,.emp-app,.emp-app .emp-main,.emp-app .emp-top,.emp-app .emp-drawer,
+ .emp-app .emp-paper,.emp-app .emp-day-card,.emp-app .emp-stats article){
+ background:#1C222A!important;color:#F3F5F8!important;border-color:#333C47!important;
+ box-shadow:0 6px 20px #0000001C
+}
+html[data-bgh-theme="dark"] :is(.emp-app,.emp-app .emp-main,.auth-wrap,.shell,.shell-manager){background:#101317!important}
+html[data-bgh-theme="dark"] :is(.auth-wrap,.emp-app,.shell,.shell-manager,.panel,.auth-card,.manager-sidebar,
+ .emp-paper,.emp-top,.emp-drawer) :is(h1,h2,h3,p,label,b,strong,span,small,li,th,td),
+html[data-bgh-theme="dark"] :is(.sidebar-brand strong,.top-brand strong,.welcome h1,.overview-heading h2,
+ .monthly-heading,.monthly-stats strong,.monthly-stats span,.auth-card .brand,
+ .emp-app .emp-intro small,.emp-app .emp-intro p,.emp-app .emp-top-brand strong,
+ .emp-app .emp-day-heading strong,.emp-app .emp-day-heading span,.emp-app .emp-day-hours span,
+ .emp-app .emp-day-hours b,.emp-app .emp-line b,.emp-app .emp-line span,
+ .emp-app .emp-news b,.emp-app .emp-news p,.emp-app .emp-stats article strong,
+ .emp-app .emp-stats article small,.row b,.row p,.row span,
+ .report-menu-title,.announcement-title,.report-people strong){color:#F3F5F8!important}
+html[data-bgh-theme="dark"] :is(.muted,.hint,.foot,.auth-card .sub,.auth-card footer,
+ .sidebar-brand small,.emp-app small,.emp-app .emp-paper p,
+ .emp-app .emp-drawer>p,.report-period,.day-count,.monthly-stats small){color:#C4CBD5!important}
+html[data-bgh-theme="dark"] :is(input,textarea,select,.auth-card input,
+ .staff-detail-form textarea,.company-settings-form input,
+ .emp-app input,.emp-app textarea,.emp-app select){
+ background:#242C36!important;color:#F3F5F8!important;border-color:#45515F!important;
+ color-scheme:dark!important
+}
+html[data-bgh-theme="dark"] :is(input,textarea)::placeholder{color:#BBC4CF!important}
+html[data-bgh-theme="dark"] :is(button.secondary,.manager-sidebar .side-link,.emp-app .emp-intro button,
+ .emp-app .emp-top button,.emp-app .emp-drawer nav button,.emp-app .emp-drawer>button:not(.emp-logout),
+ .bell-button,.tabs button,.report-menu .report-link){
+ background:#252C36!important;color:#E8EBF0!important;border-color:#424D5C!important
+}
+html[data-bgh-theme="dark"] :is(.manager-sidebar .side-link:hover,.report-menu .report-link:hover){background:#313946!important}
+html[data-bgh-theme="dark"] :is(.manager-sidebar .side-link.selected,.tabs button.active,
+ .emp-app .emp-drawer nav button.chosen,.report-menu .report-link.selected){
+ background:#384454!important;color:#FFFFFF!important;border-color:#53657A!important
+}
+html[data-bgh-theme="dark"] :is(.sidebar-theme,.sidebar-brand,.row,.emp-line,.emp-day-heading,.monthly-section){
+ border-color:#37404A!important
+}
+html[data-bgh-theme="dark"] :is(table th,table tfoot th,.monthly-section tfoot th){
+ background:#28313B!important;color:#F3F5F8!important;border-color:#414C5A!important
+}
+html[data-bgh-theme="dark"] :is(table td,.emp-line,.day-folder summary){color:#F3F5F8!important;border-color:#3B4552!important}
+html[data-bgh-theme="dark"] table tbody tr:nth-child(even){background:#202832!important}
+html[data-bgh-theme="dark"] .day-folder[open] summary{background:#28333F!important}
+html[data-bgh-theme="dark"] :is(.report-stats span,.staff-image-input,.day-folder .table-wrap){background:#242C35!important;border-color:#3F4A57!important;color:#F3F5F8!important}
+html[data-bgh-theme="dark"] .overview-card:not(.overview-card-arrivals,.overview-card-missing,.overview-card-staff,.overview-card-advance,.overview-card-leave,.overview-card-announcements){background:#252D38!important}
+html[data-bgh-theme="dark"] .overview-card.overview-card-arrivals{background:linear-gradient(125deg,#153E2A,#214E38)!important;border-color:#326B4D!important}
+html[data-bgh-theme="dark"] .overview-card.overview-card-missing{background:linear-gradient(120deg,#62451F,#565126 50%,#26435A)!important;border-color:#7A6C3F!important}
+html[data-bgh-theme="dark"] .overview-card.overview-card-staff{background:linear-gradient(120deg,#522943,#442C61)!important;border-color:#775080!important}
+html[data-bgh-theme="dark"] .overview-card.overview-card-advance{background:linear-gradient(125deg,#5C2B32,#3E252F)!important;border-color:#7D4147!important}
+html[data-bgh-theme="dark"] .overview-card.overview-card-leave{background:linear-gradient(125deg,#213B66,#182D53)!important;border-color:#345A91!important}
+html[data-bgh-theme="dark"] .overview-card.overview-card-announcements{background:linear-gradient(120deg,#174F51,#193C4C)!important;border-color:#2B7270!important}
+html[data-bgh-theme="dark"] .overview-cards .overview-card>span,
+html[data-bgh-theme="dark"] .overview-cards .overview-card>strong{color:#FFFFFF!important}
+html[data-bgh-theme="dark"] .overview-cards .overview-card>small{color:#E2E7EE!important}
+html[data-bgh-theme="dark"] .bgh-theme-heading{color:#F4F6F9}
+html[data-bgh-theme="dark"] .bgh-theme-options{background:#151A22;border-color:#475363}
+html[data-bgh-theme="dark"] .bgh-theme-option{color:#D6DCE5!important}
+html[data-bgh-theme="dark"] .bgh-theme-option.selected,
+html[data-bgh-theme="dark"] .emp-app .bgh-theme-option.selected{
+ background:#394453!important;color:#FFFFFF!important;border-color:#64758A!important
+}
+/* Special actions stay meaningful in either color mode */
+html[data-bgh-theme="dark"] .emp-app .emp-clock button:first-child{background:#198754!important;color:#FFFFFF!important;border-color:#198754!important}
+html[data-bgh-theme="dark"] .emp-app .emp-clock button:last-child{background:#C93135!important;color:#FFFFFF!important;border-color:#C93135!important}
+html[data-bgh-theme="dark"] .emp-app .emp-paper button:not(.bgh-theme-option){color:#FFFFFF!important}
+html[data-bgh-theme="dark"] :is(.emp-missing-exit,.emp-app .emp-missing-exit){color:#FF9191!important}
+html[data-bgh-theme="dark"] .emp-app .emp-error{background:#442329!important;color:#FFAAAA!important;border-color:#773B44!important}
+html[data-bgh-theme="dark"] .emp-app .emp-success{background:#17392C!important;color:#A2F1BD!important;border-color:#295F43!important}
+html[data-bgh-theme="dark"] .emp-app .emp-drawer>.emp-logout{background:#8D3035!important;color:#FFFFFF!important;border-color:#A43B42!important}
+@media(max-width:650px){.bgh-theme-options{gap:4px}.bgh-theme-option{min-height:42px;font-size:13px}}
