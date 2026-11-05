@@ -73,11 +73,12 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
    if(data?.id){
     try{
      const {data:{session}}=await sb.auth.getSession();
-     if(session)void fetch("https://wksbzfrpyrjzopoxnajc.supabase.co/functions/v1/hotel-whatsapp-attendance",{
+     if(session)await fetch("https://wksbzfrpyrjzopoxnajc.supabase.co/functions/v1/hotel-whatsapp-attendance",{
       method:"POST",
       headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
-      body:JSON.stringify({attendance_id:data.id,action})
-     }).catch(err=>console.warn("WhatsApp attendance notification unavailable",err));
+      body:JSON.stringify({attendance_id:data.id,action}),
+      signal:AbortSignal.timeout(12000)
+     });
     }catch(err){console.warn("WhatsApp attendance setup unavailable",err)}
    }
   },en?"Saved.":action==="in"?"Giriş başarılı ✓":"Çıkış başarılı ✓");
