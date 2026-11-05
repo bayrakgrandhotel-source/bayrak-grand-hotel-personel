@@ -58,7 +58,30 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
  const totalAdvance=advances.filter(a=>a.advance_date.startsWith(day().slice(0,7))).reduce((n,a)=>n+Number(a.amount),0);
  async function run(fn:()=>Promise<void>,ok:string){setBusy(true);setError("");setSuccess("");try{await fn();await onRefresh();setSuccess(ok)}catch(e){setError(e instanceof Error?e.message:"İşlem başarısız")}finally{setBusy(false)}}
  async function clock(action:"in"|"out"){await run(async()=>{const {error}=await sb.rpc(action==="in"?"hotel_clock_in":"hotel_clock_out");if(error)throw error},en?"Saved.":"İşlem kaydedildi ✓")}
- async function request(e:FormEvent<HTMLFormElement>){e.preventDefault();await run(async()=>{const {error}=await sb.from("hotel_leave_requests").insert({staff_id:profile.id,leave_date:leaveDate,reason:leaveReason.trim()});if(error)throw error;setLeaveReason("")},en?"Request sent.":"İzin talebi gönderildi.")}
+ async function request(e:FormEvent<HTMLFormElement>){
+ e.preventDefault();
+ await run(async()=>{
+  const {data,error}=await sb.from("hotel_leave_requests")
+   .insert({staff_id:profile.id,leave_date:leaveDate,reason:leaveReason.trim()})
+   .select("id").single();
+  if(error)throw error;
+  setLeaveReason("");
+  // Saved attendance requests always succeed independently of optional email delivery.
+  // The DB trigger has already created the manager's in-app notification.
+  if(data?.id){
+   try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){
+     await fetch("https://wksbzfrpyrjzopoxnajc.supabase.co/functions/v1/hotel-leave-notify",{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
+      body:JSON.stringify({leave_request_id:data.id})
+     });
+    }
+   }catch(err){console.warn("Leave email delivery unavailable",err)}
+  }
+ },en?"Request sent.":"İzin talebi gönderildi.");
+}
  async function mark(id:string){setBusy(true);try{const {error}=await sb.from("hotel_announcement_reads").upsert({announcement_id:id,staff_id:profile.id},{onConflict:"announcement_id,staff_id",ignoreDuplicates:true});if(error)throw error;setReadIds(v=>v.includes(id)?v:[...v,id])}catch(e){setError(e instanceof Error?e.message:"Hata")}finally{setBusy(false)}}
  async function pass(e:FormEvent<HTMLFormElement>){e.preventDefault();if(newPassword!==confirmPassword||newPassword.length<8){setError(en?"Passwords do not match.":"Yeni şifreler eşleşmiyor veya çok kısa.");return}await run(async()=>{const {error}=await sb.auth.signInWithPassword({email:profile.username.toLowerCase()+"@personel.bayrak.example",password:currentPassword});if(error)throw Error(en?"Incorrect current password.":"Mevcut şifre yanlış.");const result=await sb.auth.updateUser({password:newPassword});if(result.error)throw result.error;setCurrentPassword("");setNewPassword("");setConfirmPassword("")},en?"Password changed.":"Şifre değiştirildi.")}
  async function upload(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!photo)return;await run(async()=>{if(photo.size>2097152||!["image/png","image/jpeg","image/webp"].includes(photo.type))throw Error("JPG/PNG/WEBP · Max 2MB");const ext=photo.type==="image/png"?"png":photo.type==="image/webp"?"webp":"jpg";const path=profile.id+"/"+crypto.randomUUID()+"."+ext;const {error}=await sb.storage.from("hotel-staff-photos").upload(path,photo,{contentType:photo.type});if(error)throw error;const result=await sb.rpc("hotel_set_own_photo",{p_path:path});if(result.error)throw result.error;setPhoto(null)},en?"Photo updated.":"Fotoğraf kaydedildi.")}
