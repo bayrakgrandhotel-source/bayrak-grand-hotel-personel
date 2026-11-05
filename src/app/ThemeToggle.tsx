@@ -17,7 +17,7 @@ function applyTheme(theme:Theme){
 export default function ThemeToggle({compact=false,english=false}:{compact?:boolean;english?:boolean}){
  const [theme,setTheme]=useState<Theme>("light");
  useEffect(()=>{
-  const sync=()=>setTheme(readTheme());
+  const sync=()=>{const value=readTheme();setTheme(value);document.documentElement.setAttribute("data-bgh-theme",value);document.documentElement.style.colorScheme=value};
   sync();
   // Keep tabs/screens in this browser consistent with one selected color mode.
   window.addEventListener("bayrak-theme-changed",sync);
