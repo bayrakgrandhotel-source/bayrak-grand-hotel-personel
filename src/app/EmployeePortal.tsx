@@ -28,6 +28,7 @@ function BellIcon({size=21}:{size?:number}){
 
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const time=(v:string|null)=>v?new Date(v).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
+const onlyClock=(v:string)=>new Date(v).toLocaleTimeString("tr-TR",{timeZone:"Europe/Istanbul",hour:"2-digit",minute:"2-digit",hour12:false});
 export default function EmployeePortal({sb,profile,shifts,advances,daysOff,announcements,reads,onRefresh,onLogout}:{sb:SupabaseClient;profile:Staff;shifts:Shift[];advances:Advance[];daysOff:DayOff[];announcements:Announcement[];reads:Read[];onRefresh:()=>Promise<void>;onLogout:()=>Promise<void>}){
  const [page,setPage]=useState<Page>("home"),[drawer,setDrawer]=useState(false),[lang,setLang]=useState<"tr"|"en">("tr");
  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[success,setSuccess]=useState("");
@@ -45,7 +46,13 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
  ]).then(r=>{if(!alive)return;const err=r.find(x=>x.error)?.error;if(err)throw err;setLeaves(r[0].data||[]);setPlans(r[1].data||[])}).catch(e=>{if(alive)setError(e.message)});return()=>{alive=false}},[sb,profile.id,success]);
  useEffect(()=>{let alive=true;setPhotoUrl("");if(!profile.photo_path)return;sb.storage.from("hotel-staff-photos").createSignedUrl(profile.photo_path,1800).then(({data})=>{if(alive&&data?.signedUrl)setPhotoUrl(data.signedUrl)});return()=>{alive=false}},[sb,profile.photo_path,success]);
  const selected=(p:Page)=>{setPage(p);setDrawer(false);setError("");setSuccess("")};
- const openShift=shifts.find(s=>!s.check_out),unread=announcements.filter(a=>!readIds.includes(a.id)).length;
+ const todayKey=day();
+ const openShift=shifts.find(s=>!s.check_out && (new Date().getTime()-new Date(s.check_in).getTime())<24*60*60*1000);
+ const todayOpenShift=shifts.find(s=>!s.check_out&&s.work_date===todayKey);
+ const dailyShifts=Object.entries(shifts.reduce<Record<string,Shift[]>>((groups,s)=>{
+  (groups[s.work_date]??=[]).push(s);return groups;
+ },{})).sort(([a],[b])=>b.localeCompare(a));
+ const unread=announcements.filter(a=>!readIds.includes(a.id)).length;
  const totalHours=shifts.filter(s=>s.work_date.startsWith(day().slice(0,7))&&s.check_out).reduce((n,s)=>n+(new Date(s.check_out!).getTime()-new Date(s.check_in).getTime())/3600000,0);
  const totalAdvance=advances.filter(a=>a.advance_date.startsWith(day().slice(0,7))).reduce((n,a)=>n+Number(a.amount),0);
  async function run(fn:()=>Promise<void>,ok:string){setBusy(true);setError("");setSuccess("");try{await fn();await onRefresh();setSuccess(ok)}catch(e){setError(e instanceof Error?e.message:"İşlem başarısız")}finally{setBusy(false)}}
@@ -62,8 +69,21 @@ export default function EmployeePortal({sb,profile,shifts,advances,daysOff,annou
  <main className="emp-main"><div className="emp-intro"><div><small>BAYRAK GRAND HOTEL · TRABZON</small><h1>{t(page)}</h1><p>{profile.full_name}</p></div><button onClick={()=>void onRefresh()} disabled={busy}>↻ {t("refresh")}</button></div>
  {error&&<div className="emp-error">{error}</div>}{success&&<div className="emp-success">{success}</div>}
  {page==="home"&&<><div className="emp-stats"><article><small>{t("hours")}</small><strong>{totalHours.toFixed(1)} {en?"hours":"saat"}</strong></article><article><small>{t("advances")}</small><strong>{totalAdvance.toLocaleString("tr-TR",{style:"currency",currency:"TRY"})}</strong></article><article><small>{t("leaveDays")}</small><strong>{daysOff.length}</strong></article><article><small>{t("news")}</small><strong>{unread}</strong></article></div>
- <section className="emp-paper"><h2>{en?"Clock In / Out":"Mesai Giriş / Çıkış"}</h2><p>{openShift?(en?"Open shift":"Açık mesainiz var"):(en?"No active shift":"Aktif mesainiz yok")}</p><div className="emp-clock"><button disabled={busy||!!openShift} onClick={()=>void clock("in")}>{t("in")}</button><button disabled={busy||!openShift} onClick={()=>void clock("out")}>{t("out")}</button></div><small>{en?"Clock in/out only on hotel Wi-Fi.":"Giriş ve çıkış yalnızca otelin Wi-Fi ağı üzerinden yapılabilir."}</small></section>
- <section className="emp-paper"><h2>{t("record")}</h2>{shifts.slice(0,15).map(s=><div className="emp-line" key={s.id}><span>{s.work_date.split("-").reverse().join(".")}</span><b>{time(s.check_in)} · {time(s.check_out)}</b></div>)}{shifts.length===0&&<p>—</p>}</section><section className="emp-paper"><h2>{t("shifts")}</h2>{plans.map(p=><div className="emp-line" key={p.id}><span>{p.work_date.split("-").reverse().join(".")}</span><b>{p.planned_start.slice(0,5)}–{p.planned_end.slice(0,5)}</b></div>)}{plans.length===0&&<p>—</p>}</section></>}
+ <section className="emp-paper"><h2>{en?"Clock In / Out":"Mesai Giriş / Çıkış"}</h2><p>{todayOpenShift?(en?"Today's shift is still open.":"Bugünkü mesainizin çıkışı bekleniyor."):openShift?(en?"An earlier shift is still open. You may clock out from that shift or clock in for today.":"Önceki günden açık mesainiz var. O mesainin çıkışını yapabilir veya bugün için yeni giriş oluşturabilirsiniz."):(en?"No active shift today.":"Bugün için aktif mesainiz yok.")}</p><div className="emp-clock"><button disabled={busy||!!todayOpenShift} onClick={()=>void clock("in")}>{t("in")}</button><button disabled={busy||!openShift} onClick={()=>void clock("out")}>{t("out")}</button></div><small>{en?"Clock in/out only on hotel Wi-Fi.":"Giriş ve çıkış yalnızca otelin Wi-Fi ağı üzerinden yapılabilir."}</small></section>
+ <section className="emp-paper"><h2>{t("record")}</h2>
+ <div className="emp-day-list">{dailyShifts.map(([workDate,logs])=>
+  <div key={workDate} className="emp-day-card">
+   <div className="emp-day-heading"><strong>{workDate.split("-").reverse().join(".")}</strong><span>{workDate===todayKey?(en?"Today":"Bugün"):""}</span></div>
+   {logs.map(s=><div className="emp-day-hours" key={s.id}>
+    <div><span>{en?"Clock In":"Giriş Saati"}</span><b>{onlyClock(s.check_in)}</b></div>
+    <div><span>{en?"Clock Out":"Çıkış Saati"}</span>
+      {s.check_out?<b>{onlyClock(s.check_out)}</b>:<b className={workDate<todayKey?"emp-missing-exit":"emp-pending-exit"}>{workDate<todayKey?(en?"Not clocked out":"Çıkış yapılmadı"):(en?"Awaiting clock out":"Çıkış bekleniyor")}</b>}
+    </div>
+   </div>)}
+  </div>
+ )}</div>
+ {shifts.length===0&&<p>{en?"No attendance records yet.":"Henüz mesai kaydı bulunmuyor."}</p>}
+ </section><section className="emp-paper"><h2>{t("shifts")}</h2>{plans.map(p=><div className="emp-line" key={p.id}><span>{p.work_date.split("-").reverse().join(".")}</span><b>{p.planned_start.slice(0,5)}–{p.planned_end.slice(0,5)}</b></div>)}{plans.length===0&&<p>—</p>}</section></>}
  {page==="leave"&&<><section className="emp-paper"><h2>{t("leave")}</h2><form onSubmit={request}><label>{t("date")}<input type="date" required min={day()} value={leaveDate} onChange={e=>setLeaveDate(e.target.value)}/></label><label>{t("reason")}<textarea minLength={3} maxLength={500} required rows={3} value={leaveReason} onChange={e=>setLeaveReason(e.target.value)}/></label><button disabled={busy}>{t("send")}</button></form></section><section className="emp-paper"><h2>{t("requests")}</h2>{leaves.map(l=><div className="emp-line" key={l.id}><span>{l.leave_date} — {l.reason}</span><b>{t(l.status)}</b></div>)}{leaves.length===0&&<p>—</p>}</section><section className="emp-paper"><h2>{t("leaveDays")}</h2>{daysOff.map(d=><div className="emp-line" key={d.id}><span>{d.leave_date}</span><b>{d.note||"—"}</b></div>)}{daysOff.length===0&&<p>—</p>}</section></>}
  {page==="news"&&<section className="emp-paper"><h2>{t("news")}</h2>{announcements.map(a=><article className="emp-news" key={a.id}><b>{a.title}</b><small>{time(a.created_at)}</small><p>{a.body}</p>{!readIds.includes(a.id)&&<button onClick={()=>void mark(a.id)} disabled={busy}>{t("read")}</button>}</article>)}{announcements.length===0&&<p>—</p>}</section>}
  {page==="account"&&<section className="emp-paper"><h2>{t("account")}</h2><div className="emp-id"><div className="emp-avatar">{photoUrl?<img src={photoUrl} alt=""/>:profile.full_name.charAt(0)}</div><b>{profile.full_name}</b></div>{([[en?"Name":"Ad Soyad",profile.full_name],[en?"Phone":"Telefon",profile.phone],[en?"Email":"E-posta",profile.contact_email],[en?"Employee No":"Sicil No",profile.employee_no],[en?"Department":"Departman",profile.department],[en?"Position":"Görev",profile.job_title],[en?"Working Hours":"Çalışma Saati",profile.work_schedule],[en?"Start Date":"İşe Başlama",profile.hire_date]] as [string,string|null|undefined][]).map(([k,v])=><div className="emp-line" key={k}><span>{k}</span><b>{v||"—"}</b></div>)}<p>{en?"Information is managed by your hotel manager.":"Hesap bilgilerinizi yönetici düzenler."}</p></section>}
