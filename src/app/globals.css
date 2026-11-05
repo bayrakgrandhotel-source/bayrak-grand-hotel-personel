@@ -384,3 +384,37 @@ table td{color:#493625}
 .emp-day-hours .emp-missing-exit{color:#A94438;font-size:13px;font-weight:700}
 .emp-day-hours .emp-pending-exit{color:#987333;font-size:13px;font-weight:650}
 @media(max-width:450px){.emp-day-card{padding:13px}.emp-day-hours{gap:10px}.emp-day-hours b{font-size:15px}.emp-day-hours .emp-missing-exit,.emp-day-hours .emp-pending-exit{font-size:12px}}
+
+
+/* STAFF ONLY: white background, black text, clear green entry / red exit */
+.emp-app{background:#FFFFFF;color:#111111;--emp-cream:#FFFFFF;--emp-ink:#111111;--emp-line:#E7E7E7}
+.emp-app .emp-main{background:#FFFFFF;color:#111111}
+.emp-app .emp-top,.emp-app .emp-drawer,.emp-app .emp-paper,
+.emp-app .emp-day-card,.emp-app .emp-stats article{background:#FFFFFF;color:#111111;border-color:#E5E5E5}
+.emp-app h1,.emp-app h2,.emp-app h3,.emp-app label,.emp-app p,
+.emp-app .emp-intro p,.emp-app .emp-intro small,
+.emp-app .emp-id b,.emp-app .emp-id small,.emp-app .emp-id span,
+.emp-app .emp-line b,.emp-app .emp-line span,
+.emp-app .emp-day-heading strong,.emp-app .emp-day-heading span,
+.emp-app .emp-day-hours span,.emp-app .emp-day-hours b,
+.emp-app .emp-stats article small,.emp-app .emp-stats article strong,
+.emp-app .emp-news b,.emp-app .emp-news p,.emp-app .emp-paper p,
+.emp-app .emp-drawer>p,.emp-app .emp-top-brand strong{color:#111111}
+.emp-app input,.emp-app select,.emp-app textarea{color:#111111;background:#FFFFFF;border-color:#D1D1D1}
+.emp-app input::placeholder,.emp-app textarea::placeholder{color:#777777}
+.emp-app .emp-paper button,.emp-app .emp-news button{background:#B38B45;border-color:#B38B45;color:#FFFFFF}
+.emp-app .emp-paper button:hover:not(:disabled),.emp-app .emp-news button:hover:not(:disabled){background:#927031;color:#FFFFFF}
+.emp-app .emp-clock button:first-child{background:#198754;border:1px solid #198754;color:#FFFFFF}
+.emp-app .emp-clock button:first-child:hover:not(:disabled){background:#126A40;border-color:#126A40;color:#FFFFFF}
+.emp-app .emp-clock button:last-child{background:#D63D3D;border:1px solid #D63D3D;color:#FFFFFF}
+.emp-app .emp-clock button:last-child:hover:not(:disabled){background:#B62D2D;border-color:#B62D2D;color:#FFFFFF}
+.emp-app .emp-clock button:disabled{color:#FFFFFF;opacity:.55}
+.emp-app .emp-top button,.emp-app .emp-intro button{background:#FFFFFF;border-color:#D7D7D7;color:#111111}
+.emp-app .emp-drawer nav button,.emp-app .emp-drawer>button:not(.emp-logout){background:#FFFFFF;color:#111111;border-color:#EDEDED}
+.emp-app .emp-drawer nav button.chosen{background:#F5F5F5;color:#111111}
+.emp-app .emp-drawer>.emp-logout{background:#D63D3D;color:#FFFFFF;border-color:#D63D3D}
+.emp-app .emp-day-heading{border-bottom-color:#EAEAEA}
+.emp-app .emp-day-hours .emp-missing-exit{color:#B52F2F}
+.emp-app .emp-day-hours .emp-pending-exit{color:#111111}
+.emp-app .emp-error{color:#9F2525}
+.emp-app .emp-success{color:#186B38}
