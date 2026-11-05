@@ -418,3 +418,159 @@ table td{color:#493625}
 .emp-app .emp-day-hours .emp-pending-exit{color:#111111}
 .emp-app .emp-error{color:#9F2525}
 .emp-app .emp-success{color:#186B38}
+
+
+/* 2026-11: ALL SCREENS — CALM WHITE & CHARCOAL DESIGN */
+/* Keep the brand's warm-gold emblem, and green/red staff attendance actions. */
+:root{
+  color-scheme:light;
+  --gold:#A67C3E;
+  --gold-dark:#825D28;
+  --gold-light:#F4F0E8;
+  --cream:#FFFFFF;
+  --white:#FFFFFF;
+  --espresso:#171717;
+  --brown:#383838;
+  --line:#E5E7EB;
+  --shadow:0 4px 17px rgba(18,24,31,.04);
+  background:#FFFFFF;
+  color:#171717;
+}
+html,body{background:#FFFFFF!important;color:#171717}
+body{background-image:none!important}
+h1,h2,h3,p,li{color:inherit}
+h1,h2,h3{color:#171717}
+label{color:#292929}
+small,.muted,.hint,.foot{color:#50555C}
+a{color:#755422}
+a:hover{color:#503915}
+button{background:#2E343B;color:#FFFFFF;border:1px solid #2E343B}
+button:hover:not(:disabled){background:#434B54;color:#FFFFFF}
+button.secondary{background:#FFFFFF;color:#222222;border:1px solid #C7CDD4}
+button.secondary:hover:not(:disabled){background:#F5F6F7;color:#222222}
+button.danger{background:#B13939;color:#FFFFFF;border-color:#B13939}
+button.danger:hover:not(:disabled){background:#922B2B;color:#FFFFFF}
+input,select,textarea{background:#FFFFFF;color:#171717;border:1px solid #CED3D9;color-scheme:light}
+input::placeholder,textarea::placeholder{color:#707780}
+input:focus,select:focus,textarea:focus{outline:2px solid #C09C63;outline-offset:1px}
+button:focus-visible,a:focus-visible{outline:3px solid #B99557;outline-offset:2px}
+input[type=date],input[type=datetime-local],input[type=month],input[type=time]{color-scheme:light}
+.error{background:#FFF3F1;color:#912D2D;border:1px solid #E9C7C1}
+.success{background:#F0FAF2;color:#176437;border:1px solid #CCE9D2}
+
+/* LOGIN — pure white, black text and soft-grey outlined form */
+.auth-wrap{background:#FFFFFF}
+.auth-card{background:#FFFFFF;border:1px solid #E3E6EA;border-radius:19px;box-shadow:0 13px 35px rgba(21,28,36,.08);color:#171717}
+.auth-card .brand{color:#171717}
+.auth-card .sub,.auth-card footer{color:#444B52}
+.auth-card label{color:#242424}
+.auth-card input{background:#FFFFFF;color:#171717;border:1px solid #D0D5DA}
+.auth-card button:not(.secondary){background:#30363C;border:1px solid #30363C;color:#FFFFFF}
+.auth-card button:not(.secondary):hover{background:#454C54;color:#FFFFFF}
+
+/* MANAGER — soft borders, white workspace and readable dark ink */
+header.top{background:#FFFFFF;border-bottom:1px solid #E5E7EB;box-shadow:0 2px 12px rgba(20,27,31,.035)}
+header.top strong{color:#171717}
+.shell,.shell-manager,.welcome,.overview-main,.report-main,.staff-management{color:#171717}
+.welcome h1,.overview-heading h2,.staff-management-title h2{color:#171717}
+.panel{background:#FFFFFF;border:1px solid #E4E7EB;box-shadow:var(--shadow);color:#171717}
+.panel h2,.panel h3,.month-filters h3,.monthly-heading,.report-content h3{color:#171717}
+.panel .muted,.panel .hint{color:#4C5259}
+.row{border-top:1px solid #ECEEF1;color:#171717}
+.row b,.row p,.row span{color:#222222}
+.tabs button{background:#FFFFFF;color:#30343A;border-color:#D5D8DD}
+.tabs button.active{background:#F0F2F4;color:#171717;border-color:#AAB2BC}
+table th{background:#F6F7F8;color:#20242A;border-color:#E5E7EB}
+table td{color:#23272D;border-color:#E9EBEE}
+table tbody tr:nth-child(even){background:#FCFCFD}
+table tfoot th{background:#F1F3F5;color:#171717}
+.manager-sidebar{background:#FFFFFF;border-right:1px solid #E5E7EB;box-shadow:2px 0 12px rgba(20,27,31,.025)}
+.sidebar-brand{border-bottom:1px solid #E9EBEF}
+.sidebar-brand strong{color:#171717}
+.sidebar-brand small{color:#535B65}
+.manager-sidebar .side-link{background:#FFFFFF;color:#282C33}
+.manager-sidebar .side-link:hover{background:#F6F7F9;color:#171717}
+.manager-sidebar .side-link.selected{background:#F0F2F5;color:#171717;border-color:#D7DBDF}
+.side-icon{color:#9A7541}
+.sidebar-logout{background:#F4F5F6;border:1px solid #D7DBE0;color:#20242A}
+.sidebar-logout:hover{background:#EAEDF0;color:#171717}
+.overview-card{background:#FFFFFF;border:1px solid #E5E7EB;color:#171717;box-shadow:var(--shadow)}
+.overview-card:hover{background:#F9FAFB}
+.overview-card>span,.overview-card>strong{color:#171717}
+.overview-card>small{color:#555C65}
+.day-folder{background:#FFFFFF;border-color:#E3E6EA}
+.day-folder summary{color:#171717}
+.day-folder summary::before{color:#8F6D3A}
+.day-folder summary:hover{background:#F6F7F8}
+.day-folder[open] summary{background:#F3F5F6;border-bottom-color:#E3E6EA}
+.day-count{color:#555D66}
+.monthly-heading{color:#171717}
+.monthly-stats>div{background:#FFFFFF;border-color:#E4E7EB}
+.monthly-stats span,.monthly-stats strong{color:#171717}
+.monthly-stats small{color:#525962}
+.monthly-section{border-color:#E5E7EB}
+.monthly-section tfoot th{background:#F1F3F5;color:#171717}
+.notifications-unread{background:#EFF1F3;border:1px solid #D7DBDF;color:#222222}
+.bell-button{background:#FFFFFF;color:#202020;border:1px solid #D8DCE1}
+.bell-button:hover{background:#F5F6F8}
+.bell-count{background:#A23131;color:#FFFFFF;border:1px solid #FFFFFF}
+.announcement-compose{background:#FFFFFF;border-color:#E1E5E9}
+.announcement-compose textarea{background:#FFFFFF;border-color:#D3D8DD;color:#171717}
+.announcement-item,.announcement-new{background:#FFFFFF;border-color:#E0E5E9}
+.announcement-new{border-left:3px solid #A67C3E}
+.announcement-title{color:#171717}
+.company-settings-form label{color:#171717}
+.company-settings-form input{background:#FFFFFF;border-color:#D3D8DE;color:#171717}
+.company-settings-footer{border-color:#E2E5E9}
+.staff-detail-form>h3{border-color:#E6E8EB}
+.staff-detail-form textarea{background:#FFFFFF;border-color:#D5DADF;color:#171717}
+.staff-image-input{border-color:#CFD4D9}
+.staff-image-input span{color:#505963}
+.report-menu{background:#FFFFFF;border-color:#E5E7EB}
+.report-menu-group{border-bottom-color:#E9EBEF}
+.report-menu-title{color:#171717}
+.report-menu .report-link{color:#323940}
+.report-menu .report-link:hover{background:#F6F7F9}
+.report-menu .report-link.selected{background:#F0F2F5;color:#171717;border-left-color:#A67C3E}
+.report-period{color:#515963}
+.report-stats span{background:#FFFFFF;border-color:#E4E7EB;color:#414A53}
+.report-stats b{color:#171717}
+.report-warning{background:#FFFAEC;border-color:#E7DAB4;color:#473E26}
+.report-people>div{background:#F8F9FA;color:#171717}
+.report-people strong{color:#171717}
+.report-plan{background:#FFFFFF;border-color:#E5E7EB}
+.report-plan>summary{color:#171717}
+.report-plans-list>div{border-color:#E4E7EB}
+
+/* EMPLOYEE — same gentle white/black palette everywhere */
+.emp-app,.emp-app .emp-main,.emp-app .emp-top,.emp-app .emp-drawer,
+.emp-app .emp-paper,.emp-app .emp-day-card,.emp-app .emp-stats article{background:#FFFFFF;color:#171717}
+.emp-app h1,.emp-app h2,.emp-app h3,.emp-app p,.emp-app label,.emp-app .emp-top-brand strong,
+.emp-app .emp-paper p,.emp-app .emp-intro small,.emp-app .emp-intro p,
+.emp-app .emp-day-heading strong,.emp-app .emp-day-heading span,
+.emp-app .emp-day-hours span,.emp-app .emp-day-hours b,
+.emp-app .emp-line b,.emp-app .emp-line span,
+.emp-app .emp-id b,.emp-app .emp-id small,.emp-app .emp-id span,
+.emp-app .emp-news b,.emp-app .emp-news p,
+.emp-app .emp-stats article strong,.emp-app .emp-stats article small{color:#171717}
+.emp-app .emp-day-card,.emp-app .emp-paper,.emp-app .emp-stats article{border-color:#E5E7EB}
+.emp-app .emp-day-heading,.emp-app .emp-line{border-color:#E8EAED}
+.emp-app input,.emp-app select,.emp-app textarea{background:#FFFFFF;color:#171717;border-color:#D1D6DC}
+.emp-app .emp-drawer nav button,.emp-app .emp-drawer>button:not(.emp-logout){background:#FFFFFF;color:#171717;border-color:#E5E7EB}
+.emp-app .emp-drawer nav button.chosen{background:#F0F2F5;color:#171717}
+.emp-app .emp-drawer nav button>span{background:#F4F5F7;color:#373D44}
+.emp-app .emp-top button,.emp-app .emp-intro button{background:#FFFFFF;border-color:#D8DDE1;color:#171717}
+/* Staff form buttons keep visible white text. */
+.emp-app .emp-paper button:not(.emp-clock button),.emp-app .emp-news button{background:#353C43;border:1px solid #353C43;color:#FFFFFF}
+.emp-app .emp-paper button:not(.emp-clock button):hover:not(:disabled){background:#4A535C;color:#FFFFFF}
+/* Required attendance colors always win over the generic staff button rules. */
+.emp-app .emp-clock button:first-child{background:#198754!important;color:#FFFFFF!important;border:1px solid #198754!important}
+.emp-app .emp-clock button:first-child:hover:not(:disabled){background:#126C41!important}
+.emp-app .emp-clock button:last-child{background:#C93135!important;color:#FFFFFF!important;border:1px solid #C93135!important}
+.emp-app .emp-clock button:last-child:hover:not(:disabled){background:#A9272B!important}
+.emp-app .emp-clock button:disabled{opacity:.53;color:#FFFFFF!important}
+/* Keep meaningful error/success states. */
+.emp-app .emp-missing-exit{color:#B1292D!important}
+.emp-app .emp-error{color:#9E2B2E}
+.emp-app .emp-success{color:#1E6940}
+@media(prefers-reduced-motion:reduce){.emp-drawer,.overview-card{transition:none;transform:none}}
