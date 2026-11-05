@@ -806,3 +806,13 @@ html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button em{
 html[data-bgh-theme="dark"] .leave-notice-new{background:#2F2A23;border-left-color:#D7AE66}
 html[data-bgh-theme="dark"] .leave-notice p{color:#F2F3F5}
 html[data-bgh-theme="dark"] .leave-menu-count{background:#BD4A48;color:#FFF}
+
+
+/* WhatsApp opt-in and manager attendance notification settings */
+.whatsapp-settings-form{display:grid;gap:14px;max-width:570px;margin:16px 0}
+.whatsapp-settings-form>label:not(.whatsapp-check){display:grid;gap:7px;font-weight:600}
+.whatsapp-settings-form .whatsapp-check{display:flex;gap:12px;align-items:flex-start;line-height:1.5;cursor:pointer;padding:6px 0;color:inherit}
+.whatsapp-settings-form .whatsapp-check input{width:18px;height:18px;flex:0 0 auto;margin-top:2px;accent-color:#A67C3E}
+.whatsapp-settings-form button{justify-self:start}
+.emp-app .emp-paper>button.secondary{background:#FFFFFF;color:#171717;border:1px solid #CCD2D9}
+html[data-bgh-theme="dark"] .emp-app .emp-paper>button.secondary{background:#344150!important;color:#FFFFFF!important;border-color:#566779!important}
