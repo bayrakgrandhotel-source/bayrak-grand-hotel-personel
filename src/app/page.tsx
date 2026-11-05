@@ -34,7 +34,7 @@ type HotelWifi={id:string;ip:string;created_at:string};
 type Announcement={id:string;title:string;body:string;created_at:string;created_by:string};
 type AnnouncementRead={announcement_id:string;staff_id:string;read_at:string};
 type ManagerLeaveNotification={id:string;leave_request_id:string;staff_id:string;title:string;message:string;created_at:string;read_at:string|null;email_sent_at:string|null};
-type WhatsappSettings={manager_id:string;boss_phone:string|null;boss_consent:boolean;boss_clock_in_enabled:boolean;staff_clock_in_enabled:boolean;staff_clock_out_enabled:boolean};
+type WhatsappSettings={manager_id:string;boss_phone:string|null;company_sender_phone:string|null;boss_consent:boolean;boss_clock_in_enabled:boolean;staff_clock_in_enabled:boolean;staff_clock_out_enabled:boolean};
 type Tab="genel"|"personel"|"mesai"|"avans"|"izin"|"aylik"|"duyurular"|"raporlar"|"ayarlar";
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const stamp=(value:string|null)=>value?new Date(value).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
@@ -114,7 +114,7 @@ export default function Home(){
  useEffect(()=>{
   if(profile?.role!=="manager"){setWhatsappSettings(null);return;}
   let live=true;
-  sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled")
+  sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,company_sender_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled")
   .eq("manager_id",profile.id).maybeSingle().then(({data,error})=>{
    if(!live||error)return;
    const setting=(data as WhatsappSettings|null);
@@ -266,7 +266,7 @@ export default function Home(){
     p_staff_clock_out_enabled:whatsappStaffOut
    });
    if(error)throw error;
-   const {data}=await sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled").eq("manager_id",profile.id).maybeSingle();
+   const {data}=await sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,company_sender_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled").eq("manager_id",profile.id).maybeSingle();
    if(!data)throw Error("Kayıt doğrulanamadı. Sayfayı yenileyip tekrar deneyin.");
    const s=data as WhatsappSettings;
    setWhatsappSettings(s);
@@ -333,6 +333,7 @@ export default function Home(){
  <section className="panel">
  <h2>WhatsApp Mesai Bildirimleri</h2>
  <p className="muted">Personel otel Wi-Fi üzerinden giriş yaptığında patronun telefonuna, personel giriş veya çıkış yaptığında ise izin vermiş personelin kendi WhatsApp numarasına şirket hesabından bildirim göndermek için ayarları kullanın.</p>
+ <p className="muted">Şirketin mesaj göndereceği WhatsApp hattı: <b>{whatsappSettings?.company_sender_phone ? "+"+whatsappSettings.company_sender_phone : "Henüz kaydedilmedi"}</b>. Bu numara Meta WhatsApp Business Platform'a bağlandıktan sonra otomatik mesajlarda gönderen olarak kullanılabilir.</p>
  <form className="whatsapp-settings-form" onSubmit={saveWhatsappSettings}>
  <label>Patron WhatsApp Numarası (ülke koduyla)
  <input type="tel" inputMode="tel" value={whatsappBossPhone} maxLength={22} placeholder="905XXXXXXXXX" onChange={e=>setWhatsappBossPhone(e.target.value)}/>
