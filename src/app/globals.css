@@ -816,3 +816,11 @@ html[data-bgh-theme="dark"] .leave-menu-count{background:#BD4A48;color:#FFF}
 .whatsapp-settings-form button{justify-self:start}
 .emp-app .emp-paper>button.secondary{background:#FFFFFF;color:#171717;border:1px solid #CCD2D9}
 html[data-bgh-theme="dark"] .emp-app .emp-paper>button.secondary{background:#344150!important;color:#FFFFFF!important;border-color:#566779!important}
+
+
+/* Unambiguous WhatsApp status: saved preferences do not mean messages are being delivered. */
+.whatsapp-connection-note{margin:14px 0;padding:13px 16px;border:1px solid #E8C68D;border-left:4px solid #B97B20;border-radius:11px;background:#FFF6E7;color:#543C19}
+.whatsapp-connection-note b{font-weight:700}
+.whatsapp-connection-note p{margin:6px 0 0;line-height:1.55;color:#543C19}
+html[data-bgh-theme="dark"] .whatsapp-connection-note{background:#433624;border-color:#957041;color:#FFF4DB}
+html[data-bgh-theme="dark"] .whatsapp-connection-note p,html[data-bgh-theme="dark"] .whatsapp-connection-note b{color:#FFF4DB!important}
