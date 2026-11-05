@@ -561,8 +561,8 @@ table tfoot th{background:#F1F3F5;color:#171717}
 .emp-app .emp-drawer nav button>span{background:#F4F5F7;color:#373D44}
 .emp-app .emp-top button,.emp-app .emp-intro button{background:#FFFFFF;border-color:#D8DDE1;color:#171717}
 /* Staff form buttons keep visible white text. */
-.emp-app .emp-paper button:not(.emp-clock button),.emp-app .emp-news button{background:#353C43;border:1px solid #353C43;color:#FFFFFF}
-.emp-app .emp-paper button:not(.emp-clock button):hover:not(:disabled){background:#4A535C;color:#FFFFFF}
+.emp-app .emp-paper button,.emp-app .emp-news button{background:#353C43;border:1px solid #353C43;color:#FFFFFF}
+.emp-app .emp-paper button:hover:not(:disabled){background:#4A535C;color:#FFFFFF}
 /* Required attendance colors always win over the generic staff button rules. */
 .emp-app .emp-clock button:first-child{background:#198754!important;color:#FFFFFF!important;border:1px solid #198754!important}
 .emp-app .emp-clock button:first-child:hover:not(:disabled){background:#126C41!important}
@@ -573,4 +573,4 @@ table tfoot th{background:#F1F3F5;color:#171717}
 .emp-app .emp-missing-exit{color:#B1292D!important}
 .emp-app .emp-error{color:#9E2B2E}
 .emp-app .emp-success{color:#1E6940}
-@media(prefers-reduced-motion:reduce){.emp-drawer,.overview-card{transition:none;transform:none}}
+@media(prefers-reduced-motion:reduce){.emp-drawer,.overview-card{transition:none}}
