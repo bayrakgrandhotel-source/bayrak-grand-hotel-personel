@@ -26,13 +26,14 @@ const SB_URL="https://wksbzfrpyrjzopoxnajc.supabase.co";
 const SB_KEY="sb_publishable_pzEUUtm95mpq3vynU2rVWQ_Z_82dfjl";
 const sb=createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
 const email=(s:string)=>s.trim().toLowerCase()+"@personel.bayrak.example";
-type Profile={id:string;username:string;full_name:string;login_email:string;role:"manager"|"staff";active:boolean};
+type Profile={id:string;username:string;full_name:string;login_email:string;role:"manager"|"staff";active:boolean;contact_email?:string|null};
 type Shift={id:string;staff_id:string;work_date:string;check_in:string;check_out:string|null};
 type Advance={id:string;staff_id:string;advance_date:string;amount:number;note:string|null};
 type DayOff={id:string;staff_id:string;leave_date:string;note:string|null};
 type HotelWifi={id:string;ip:string;created_at:string};
 type Announcement={id:string;title:string;body:string;created_at:string;created_by:string};
 type AnnouncementRead={announcement_id:string;staff_id:string;read_at:string};
+type ManagerLeaveNotification={id:string;leave_request_id:string;staff_id:string;title:string;message:string;created_at:string;read_at:string|null;email_sent_at:string|null};
 type Tab="genel"|"personel"|"mesai"|"avans"|"izin"|"aylik"|"duyurular"|"raporlar"|"ayarlar";
 const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const stamp=(value:string|null)=>value?new Date(value).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul",dateStyle:"short",timeStyle:"short"}):"—";
@@ -51,6 +52,8 @@ export default function Home(){
  const [announcements,setAnnouncements]=useState<Announcement[]>([]);
  const [announcementReads,setAnnouncementReads]=useState<AnnouncementRead[]>([]);
  const [sendingAnnouncement,setSendingAnnouncement]=useState(false);
+ const [leaveNotices,setLeaveNotices]=useState<ManagerLeaveNotification[]>([]);
+ const [emailSaving,setEmailSaving]=useState(false);
  const [tab,setTab]=useState<Tab>("mesai");
  const [monthlyMonth,setMonthlyMonth]=useState(day().slice(0,7));
  const [monthlyStaff,setMonthlyStaff]=useState("");
@@ -100,6 +103,23 @@ export default function Home(){
    setShifts(results[1].data as Shift[]||[]);setAdvances(results[2].data as Advance[]||[]);setDaysOff(results[3].data as DayOff[]||[]);setAnnouncements(results[4].data as Announcement[]||[]);setAnnouncementReads(results[5].data as AnnouncementRead[]||[]);
    setLoading(false);
  }
+ useEffect(()=>{
+   if(profile?.role!=="manager"){setLeaveNotices([]);return;}
+   let mounted=true;
+   const load=async()=>{
+     if(document.visibilityState==="hidden")return;
+     const {data,error}=await sb.from("hotel_manager_notifications")
+       .select("id,leave_request_id,staff_id,title,message,created_at,read_at,email_sent_at")
+       .eq("manager_id",profile.id)
+       .order("created_at",{ascending:false}).limit(120);
+     if(!error&&mounted)setLeaveNotices(data as ManagerLeaveNotification[]||[]);
+   };
+   void load();
+   const timer=window.setInterval(()=>{void load()},20000);
+   const foreground=()=>{if(document.visibilityState==="visible")void load()};
+   document.addEventListener("visibilitychange",foreground);
+   return()=>{mounted=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",foreground)};
+ },[profile?.id,profile?.role]);
  useEffect(()=>{
    setSetup(new URLSearchParams(window.location.search).get("kurulum")==="1");
    refresh(true).catch(e=>{handleError(e);setLoading(false)});
@@ -189,10 +209,29 @@ export default function Home(){
    if(!confirm("Bu genel duyuru tüm personellerin ekranından silinsin mi?"))return;
    await doTask(async()=>{const {data,error}=await sb.from("hotel_announcements").delete().eq("id",id).select("id");if(error)throw error;if(!data?.length)throw Error("Duyuru silinemedi.")},"Duyuru silindi.");
  }
- async function logout(){await sb.auth.signOut();setProfile(null);setAnnouncements([]);setAnnouncementReads([]);tell("");setTab("mesai")}
+ async function markLeaveNotice(id:string){
+  if(profile?.role!=="manager")return;
+  const {error}=await sb.from("hotel_manager_notifications").update({read_at:new Date().toISOString()})
+   .eq("id",id).eq("manager_id",profile.id).is("read_at",null);
+  if(error){handleError(error);return}
+  setLeaveNotices(current=>current.map(n=>n.id===id?{...n,read_at:new Date().toISOString()}:n));
+ }
+ async function saveManagerEmail(e:FormEvent<HTMLFormElement>){
+  e.preventDefault();if(profile?.role!=="manager")return;
+  setEmailSaving(true);tell("");
+  try{
+   const raw=String(values(e).notify_email||"").trim();
+   const {error}=await sb.rpc("hotel_set_manager_notification_email",{p_email:raw});
+   if(error)throw error;
+   setProfile(p=>p?{...p,contact_email:raw||null}:p);
+   tell(raw?"Bildirim e-posta adresi kaydedildi. E-posta gönderim hizmetinin ayrıca yapılandırılması gerekir.":"Bildirim e-posta adresi kaldırıldı.");
+  }catch(err){handleError(err)}finally{setEmailSaving(false)}
+ }
+ async function logout(){await sb.auth.signOut();setProfile(null);setAnnouncements([]);setAnnouncementReads([]);setLeaveNotices([]);tell("");setTab("mesai")}
  function chooseTab(t:Tab){setTab(t);setEditShift(null);setEditAdvance(null);setEditDay(null);tell("")}
  const staff=users.filter(p=>p.role==="staff");
  const unreadAnnouncementCount=announcements.filter(a=>!announcementReads.some(r=>r.announcement_id===a.id)).length;
+ const unreadLeaveNoticeCount=leaveNotices.filter(n=>!n.read_at).length;
  const label=(id:string)=>users.find(p=>p.id===id)?.full_name||"Personel";
  const options=staff.map(s=><option key={s.id} value={s.id}>{s.full_name} ({s.username})</option>);
  const ownOpen=shifts.find(s=>s.staff_id===profile?.id&&!s.check_out);
