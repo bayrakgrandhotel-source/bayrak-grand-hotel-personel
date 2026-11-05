@@ -267,8 +267,15 @@ export default function Home(){
    });
    if(error)throw error;
    const {data}=await sb.from("hotel_whatsapp_manager_settings").select("manager_id,boss_phone,boss_consent,boss_clock_in_enabled,staff_clock_in_enabled,staff_clock_out_enabled").eq("manager_id",profile.id).maybeSingle();
-   if(data){const s=data as WhatsappSettings;setWhatsappSettings(s);setWhatsappBossPhone(s.boss_phone||"");}
-   tell("WhatsApp bildirim tercihleri kaydedildi. Otomatik gönderim için Meta WhatsApp Business Platform bağlantısı ve onaylı mesaj şablonları ayrıca gereklidir.");
+   if(!data)throw Error("Kayıt doğrulanamadı. Sayfayı yenileyip tekrar deneyin.");
+   const s=data as WhatsappSettings;
+   setWhatsappSettings(s);
+   setWhatsappBossPhone(s.boss_phone||"");
+   setWhatsappBossConsent(s.boss_consent);
+   setWhatsappBossIn(s.boss_clock_in_enabled);
+   setWhatsappStaffIn(s.staff_clock_in_enabled);
+   setWhatsappStaffOut(s.staff_clock_out_enabled);
+   tell("Tercihler veritabanına kaydedildi. WhatsApp mesajlarının gönderilmesi için ayrıca Meta bağlantısı gerekir.");
   }catch(err){handleError(err)}finally{setWhatsappSaving(false)}
  }
  async function logout(){await sb.auth.signOut();setProfile(null);setAnnouncements([]);setAnnouncementReads([]);setLeaveNotices([]);tell("");setTab("mesai")}
@@ -348,8 +355,12 @@ export default function Home(){
  </label>
  <button disabled={whatsappSaving}>{whatsappSaving?"Kaydediliyor...":"WhatsApp Ayarlarını Kaydet"}</button>
  </form>
- <p className="hint">Her personel ayrıca kendi Ayarlar sayfasından WhatsApp bildirimine onay vermelidir. Şirket telefonunun Meta WhatsApp Business Platform bağlantısı, API erişimi ve onaylı mesaj şablonları yapılmadan mesajlar otomatik gönderilemez.</p>
- {whatsappSettings&&<p className="muted">Yönetici WhatsApp tercihleri kayıtlı.</p>}
+ <div className="whatsapp-connection-note" role="status">
+ <b>Otomatik WhatsApp gönderimi henüz doğrulanmadı</b>
+ <p>Bu bölüm yalnızca numara ve bildirim tercihlerini kaydeder. Mesaj göndermek için otel numarasının WhatsApp Business Platform API bağlantısı ve onaylı şablonları gerekir. Bu bağlantı tamamlanmadan gerçek mesaj beklemeyin.</p>
+ </div>
+ {whatsappSettings&&<p className="muted">Kayıtlı patron numarası: <b>{whatsappSettings.boss_phone||"Tanımlanmadı"}</b> · İzin: <b>{whatsappSettings.boss_consent?"Açık":"Kapalı"}</b> · Giriş bildirimi: <b>{whatsappSettings.boss_clock_in_enabled?"Açık":"Kapalı"}</b></p>}
+ <p className="hint">Personel kendi Ayarlar bölümünden WhatsApp bildirimlerine izin vermelidir. Mesaj göndermek için Meta WhatsApp Business Platform bağlantısı ve onaylı mesaj şablonları gerekir.</p>
  </section>
  <section className="panel"><h2>İzin Talebi E-posta Bildirimleri</h2>
  <p className="muted">Personel izin talebi gönderdiğinde bildirim almak istediğiniz e-posta adresini buraya yazın. Uygulama içi izin bildirimleri bu ayardan bağımsız çalışır.</p>
