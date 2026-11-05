@@ -794,3 +794,15 @@ html[data-bgh-theme="dark"] .emp-app .emp-drawer nav button em{
   background:#B18A48!important;
   color:#FFFFFF!important;
 }
+
+
+/* Manager-only staff leave request notifications and readable notification controls */
+.leave-menu-count{margin-left:auto;display:grid;place-items:center;min-width:21px;height:21px;border-radius:12px;background:#BA4339;color:#FFF;font-size:11px;font-weight:700;padding:0 5px}
+.leave-bell-button{font-size:22px;line-height:1}
+.leave-notifications-panel .leave-notice{align-items:flex-start;padding:14px 10px;border-radius:10px;gap:12px}
+.leave-notice>div{flex:1;min-width:0}
+.leave-notice p{margin-top:5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.leave-notice-new{background:#FDF8ED;border-left:3px solid #BB8A36}
+html[data-bgh-theme="dark"] .leave-notice-new{background:#2F2A23;border-left-color:#D7AE66}
+html[data-bgh-theme="dark"] .leave-notice p{color:#F2F3F5}
+html[data-bgh-theme="dark"] .leave-menu-count{background:#BD4A48;color:#FFF}
