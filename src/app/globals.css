@@ -689,3 +689,73 @@ html[data-bgh-theme="dark"] .emp-app .emp-error{background:#442329!important;col
 html[data-bgh-theme="dark"] .emp-app .emp-success{background:#17392C!important;color:#A2F1BD!important;border-color:#295F43!important}
 html[data-bgh-theme="dark"] .emp-app .emp-drawer>.emp-logout{background:#8D3035!important;color:#FFFFFF!important;border-color:#A43B42!important}
 @media(max-width:650px){.bgh-theme-options{gap:4px}.bgh-theme-option{min-height:42px;font-size:13px}}
+
+
+/* Manager overview — richer six-color palette, no green/teal duplicates.
+   White text maintains contrast on every card in both display modes. */
+.overview-cards .overview-card{
+  border-width:1px!important;
+  box-shadow:0 5px 18px rgba(18,26,39,.13);
+  transition:transform .15s ease,box-shadow .15s ease,filter .15s ease;
+}
+.overview-cards .overview-card:hover:not(:disabled){
+  filter:brightness(1.055);
+  transform:translateY(-2px);
+  box-shadow:0 9px 23px rgba(18,26,39,.18);
+}
+.overview-card.overview-card-arrivals{
+  --card-accent:#116239;
+  background:linear-gradient(132deg,#258453,#176942)!important;
+  border-color:#176A43!important;
+}
+.overview-card.overview-card-missing{
+  --card-accent:#945609;
+  background:linear-gradient(130deg,#BF7C22 0%,#AE7122 72%,#567A94 100%)!important;
+  border-color:#A16A26!important;
+}
+.overview-card.overview-card-staff{
+  --card-accent:#70308D;
+  background:linear-gradient(130deg,#AC4D98,#7939A5)!important;
+  border-color:#823C9D!important;
+}
+.overview-card.overview-card-advance{
+  --card-accent:#8D232F;
+  background:linear-gradient(130deg,#C13F4E,#9F2E40)!important;
+  border-color:#A52F40!important;
+}
+.overview-card.overview-card-leave{
+  --card-accent:#142F5D;
+  background:linear-gradient(130deg,#2B558E,#1C3C6B)!important;
+  border-color:#214172!important;
+}
+.overview-card.overview-card-announcements{
+  --card-accent:#212C38;
+  background:linear-gradient(130deg,#465362,#2C3744)!important;
+  border-color:#354150!important;
+}
+.overview-cards .overview-card>span,
+.overview-cards .overview-card>strong{color:#FFFFFF!important;text-shadow:0 1px 2px rgba(0,0,0,.10)}
+.overview-cards .overview-card>small{color:#F1F4F8!important}
+/* Slightly deeper tones when black mode is selected. */
+html[data-bgh-theme="dark"] .overview-card.overview-card-arrivals{
+  background:linear-gradient(130deg,#1A6841,#124F32)!important;border-color:#258052!important;
+}
+html[data-bgh-theme="dark"] .overview-card.overview-card-missing{
+  background:linear-gradient(135deg,#8D5B19 0%,#76501D 75%,#3C5A70 100%)!important;border-color:#9C6A2A!important;
+}
+html[data-bgh-theme="dark"] .overview-card.overview-card-staff{
+  background:linear-gradient(130deg,#843B75,#602D87)!important;border-color:#9B4C99!important;
+}
+html[data-bgh-theme="dark"] .overview-card.overview-card-advance{
+  background:linear-gradient(130deg,#922C3D,#79283A)!important;border-color:#B14553!important;
+}
+html[data-bgh-theme="dark"] .overview-card.overview-card-leave{
+  background:linear-gradient(130deg,#254775,#192F54)!important;border-color:#315993!important;
+}
+html[data-bgh-theme="dark"] .overview-card.overview-card-announcements{
+  background:linear-gradient(130deg,#3B4653,#27313D)!important;border-color:#525E6D!important;
+}
+html[data-bgh-theme="dark"] .overview-cards .overview-card>span,
+html[data-bgh-theme="dark"] .overview-cards .overview-card>strong{color:#FFFFFF!important}
+html[data-bgh-theme="dark"] .overview-cards .overview-card>small{color:#F1F4F8!important}
+@media(prefers-reduced-motion:reduce){.overview-cards .overview-card:hover:not(:disabled){transform:none}}
