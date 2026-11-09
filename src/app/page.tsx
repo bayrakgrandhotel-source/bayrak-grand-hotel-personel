@@ -54,6 +54,10 @@ export default function Home(){
  const [sendingAnnouncement,setSendingAnnouncement]=useState(false);
  const [leaveNotices,setLeaveNotices]=useState<ManagerLeaveNotification[]>([]);
  const [emailSaving,setEmailSaving]=useState(false);
+ const [managerPasswordSaving,setManagerPasswordSaving]=useState(false);
+ const [managerCurrentPassword,setManagerCurrentPassword]=useState("");
+ const [managerNewPassword,setManagerNewPassword]=useState("");
+ const [managerConfirmPassword,setManagerConfirmPassword]=useState("");
  const [tab,setTab]=useState<Tab>("mesai");
  const [monthlyMonth,setMonthlyMonth]=useState(day().slice(0,7));
  const [monthlyStaff,setMonthlyStaff]=useState("");
@@ -227,6 +231,26 @@ export default function Home(){
    tell(raw?"Bildirim e-posta adresi kaydedildi. E-posta gönderim hizmetinin ayrıca yapılandırılması gerekir.":"Bildirim e-posta adresi kaldırıldı.");
   }catch(err){handleError(err)}finally{setEmailSaving(false)}
  }
+ async function changeManagerPassword(e:FormEvent<HTMLFormElement>){
+  e.preventDefault();
+  if(!profile||profile.role!=="manager"||managerPasswordSaving)return;
+  if(managerNewPassword.length<8){tell("Yeni şifre en az 8 karakter olmalı.",true);return}
+  if(managerNewPassword!==managerConfirmPassword){tell("Yeni şifreler eşleşmiyor.",true);return}
+  if(managerCurrentPassword===managerNewPassword){tell("Yeni şifre mevcut şifreden farklı olmalı.",true);return}
+  setManagerPasswordSaving(true);tell("");
+  try{
+   // Always verify the existing password before changing the manager's credentials.
+   const {error:verifyError}=await sb.auth.signInWithPassword({
+    email:profile.login_email,
+    password:managerCurrentPassword
+   });
+   if(verifyError)throw Error("Mevcut şifre hatalı. Lütfen kontrol edin.");
+   const {error:changeError}=await sb.auth.updateUser({password:managerNewPassword});
+   if(changeError)throw changeError;
+   setManagerCurrentPassword("");setManagerNewPassword("");setManagerConfirmPassword("");
+   tell("Yönetici şifresi başarıyla değiştirildi. Bir sonraki girişinizde yeni şifrenizi kullanın.");
+  }catch(err){handleError(err)}finally{setManagerPasswordSaving(false)}
+ }
  async function logout(){await sb.auth.signOut();setProfile(null);setAnnouncements([]);setAnnouncementReads([]);setLeaveNotices([]);tell("");setTab("mesai")}
  function chooseTab(t:Tab){setTab(t);setEditShift(null);setEditAdvance(null);setEditDay(null);tell("")}
  const staff=users.filter(p=>p.role==="staff");
@@ -278,7 +302,18 @@ export default function Home(){
  </section>}
  {manager&&tab==="personel"&&<StaffManagement sb={sb} staff={staff} onCreate={async d=>await api({action:"create_staff",...d})} onSaved={refresh}/>}
  {manager&&tab==="personel"&&<section className="panel"><h2>Hesap Yönetimi</h2><p className="muted">Şifre yenileme ve aktif/pasif işlemleri sadece yönetici tarafından yapılabilir.</p>{staff.map(s=><div className="row" key={s.id}><div><b>{s.full_name}</b><p className="muted">@{s.username} · {s.active?"Aktif":"Pasif"}</p></div><div className="actions"><button className="secondary" onClick={()=>{const pass=prompt("Yeni şifre (en az 8 karakter):");if(pass)doTask(()=>api({action:"reset_password",id:s.id,password:pass}),"Şifre yenilendi.")}}>Şifreyi Yenile</button><button className={s.active?"danger":"secondary"} onClick={()=>{if(confirm(s.active?"Personel hesabı pasife alınsın mı?":"Personel hesabı aktifleştirilsin mi?"))doTask(()=>api({action:"set_active",id:s.id,active:!s.active}))}}>{s.active?"Pasife Al":"Aktifleştir"}</button></div></div>)}</section>}
- {manager&&tab==="ayarlar"&&<><CompanySettings sb={sb} managerId={profile.id} managerName={profile.full_name}/>
+ {manager&&tab==="ayarlar"&&<>
+ <section className="panel">
+  <h2>Yönetici Şifresini Değiştir</h2>
+  <p className="muted">Güvenlik için önce mevcut yönetici şifrenizi girin. Yeni şifreniz en az 8 karakter olmalı. Şifrelerinizi kimseyle paylaşmayın.</p>
+  <form onSubmit={changeManagerPassword} style={{marginTop:14,maxWidth:480}} autoComplete="off">
+   <label>Mevcut Şifre<input type="password" name="manager_current_password" autoComplete="current-password" required value={managerCurrentPassword} onChange={e=>setManagerCurrentPassword(e.target.value)}/></label>
+   <label>Yeni Şifre<input type="password" name="manager_new_password" autoComplete="new-password" required minLength={8} value={managerNewPassword} onChange={e=>setManagerNewPassword(e.target.value)}/></label>
+   <label>Yeni Şifre Tekrar<input type="password" name="manager_confirm_password" autoComplete="new-password" required minLength={8} value={managerConfirmPassword} onChange={e=>setManagerConfirmPassword(e.target.value)}/></label>
+   <button disabled={managerPasswordSaving}>{managerPasswordSaving?"Şifre Değiştiriliyor...":"Yönetici Şifresini Değiştir"}</button>
+  </form>
+ </section>
+ <CompanySettings sb={sb} managerId={profile.id} managerName={profile.full_name}/>
  <section className="panel"><h2>İzin Talebi E-posta Bildirimleri</h2>
  <p className="muted">Personel izin talebi gönderdiğinde bildirim almak istediğiniz e-posta adresini buraya yazın. Uygulama içi izin bildirimleri bu ayardan bağımsız çalışır.</p>
  <form key={profile.id+":"+(profile.contact_email||"")} onSubmit={saveManagerEmail} style={{marginTop:14,maxWidth:480}}>
