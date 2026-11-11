@@ -124,6 +124,15 @@ export default function Home(){
    document.addEventListener("visibilitychange",foreground);
    return()=>{mounted=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",foreground)};
  },[profile?.id,profile?.role]);
+ // Do not keep everyone on the loading screen indefinitely if the Auth API is unreachable.
+ useEffect(()=>{
+   if(!loading)return;
+   const id=window.setTimeout(()=>{
+     setLoading(false);
+     setError("Sunucu bağlantısı zaman aşımına uğradı. İnterneti kontrol edin ve sayfayı yenileyin. Sorun devam ederse mobil veriyle deneyin.");
+   },12000);
+   return()=>window.clearTimeout(id);
+ },[loading]);
  useEffect(()=>{
    setSetup(new URLSearchParams(window.location.search).get("kurulum")==="1");
    refresh(true).catch(e=>{handleError(e);setLoading(false)});
