@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/github-pages-main.yml
+      - src/app/page.tsx
   workflow_dispatch:
 
 permissions:
