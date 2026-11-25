@@ -1,6 +1,6 @@
 "use client";
 import {createClient} from "@supabase/supabase-js";
-import {useEffect,useRef,useState} from "react";
+import {useEffect,useState} from "react";
 import type {FormEvent} from "react";
 import ReportsPanel from "./ReportsPanel";
 import StaffManagement from "./StaffManagement";
@@ -30,7 +30,6 @@ type Profile={id:string;username:string;full_name:string;login_email:string;role
 type Shift={id:string;staff_id:string;work_date:string;check_in:string;check_out:string|null};
 type Advance={id:string;staff_id:string;advance_date:string;amount:number;note:string|null};
 type DayOff={id:string;staff_id:string;leave_date:string;note:string|null};
-type HotelWifi={id:string;ip:string;created_at:string};
 type Announcement={id:string;title:string;body:string;created_at:string;created_by:string};
 type AnnouncementRead={announcement_id:string;staff_id:string;read_at:string};
 type ManagerLeaveNotification={id:string;leave_request_id:string;staff_id:string;title:string;message:string;created_at:string;read_at:string|null;email_sent_at:string|null};
@@ -43,12 +42,10 @@ const values=(e:FormEvent<HTMLFormElement>)=>Object.fromEntries(new FormData(e.c
 
 export default function Home(){
  const [profile,setProfile]=useState<Profile|null>(null);
- const sessionRole=useRef<"manager"|"staff"|null>(null);
  const [users,setUsers]=useState<Profile[]>([]);
  const [shifts,setShifts]=useState<Shift[]>([]);
  const [advances,setAdvances]=useState<Advance[]>([]);
  const [daysOff,setDaysOff]=useState<DayOff[]>([]);
- const [wifiNetworks,setWifiNetworks]=useState<HotelWifi[]>([]);
  const [announcements,setAnnouncements]=useState<Announcement[]>([]);
  const [announcementReads,setAnnouncementReads]=useState<AnnouncementRead[]>([]);
  const [sendingAnnouncement,setSendingAnnouncement]=useState(false);
@@ -88,20 +85,16 @@ export default function Home(){
    if(!response.ok||payload.error)throw Error(payload.error||"İşlem başarısız.");
    return payload;
  }
- async function refresh(isInitialLoad=false){
+ async function refresh(){
    const {data:{user},error:authError}=await sb.auth.getUser();
-   if(authError||!user){sessionRole.current=null;setProfile(null);setLoading(false);return}
+   if(authError||!user){setProfile(null);setLoading(false);return}
    const {data:me,error:pErr}=await sb.from("hotel_profiles").select("*").eq("id",user.id).maybeSingle();
-   if(pErr||!me||!me.active){await sb.auth.signOut({scope:"local"});sessionRole.current=null;setProfile(null);setLoading(false);tell("Hesap bulunamadı veya pasif durumda.",true);return}
-   // Staff are never restored from a previous page load. Managers may keep their sessions.
-   if(isInitialLoad&&me.role!=="manager"){await sb.auth.signOut({scope:"local"});sessionRole.current=null;setProfile(null);setLoading(false);return}
-   sessionRole.current=me.role;
+   if(pErr||!me||!me.active){await sb.auth.signOut({scope:"local"});setProfile(null);setLoading(false);tell("Hesap bulunamadı veya pasif durumda.",true);return}
    const isManager=me.role==="manager";
    const p=isManager?sb.from("hotel_profiles").select("*"):sb.from("hotel_profiles").select("*").eq("id",user.id);
    const results=await Promise.all([p,sb.from("hotel_attendance").select("*").order("check_in",{ascending:false}).limit(400),sb.from("hotel_advances").select("*").order("advance_date",{ascending:false}).limit(400),sb.from("hotel_days_off").select("*").order("leave_date",{ascending:false}).limit(400),sb.from("hotel_announcements").select("*").order("created_at",{ascending:false}).limit(100),sb.from("hotel_announcement_reads").select("announcement_id,staff_id,read_at").eq("staff_id",user.id).limit(200)]);
    const problem=results.find(x=>x.error)?.error;
    if(problem)throw Error(problem.message);
-   if(isManager){const {data:wifi,error:wifiErr}=await sb.from("hotel_wifi_networks").select("id,ip,created_at").order("created_at",{ascending:false});if(wifiErr)throw wifiErr;setWifiNetworks(wifi as HotelWifi[]||[])}else setWifiNetworks([]);
    if(!profile&&isManager)setTab("genel");
    setProfile(me as Profile);setUsers(results[0].data as Profile[]||[]);
    setShifts(results[1].data as Shift[]||[]);setAdvances(results[2].data as Advance[]||[]);setDaysOff(results[3].data as DayOff[]||[]);setAnnouncements(results[4].data as Announcement[]||[]);setAnnouncementReads(results[5].data as AnnouncementRead[]||[]);
@@ -135,16 +128,10 @@ export default function Home(){
  },[loading]);
  useEffect(()=>{
    setSetup(new URLSearchParams(window.location.search).get("kurulum")==="1");
-   refresh(true).catch(e=>{handleError(e);setLoading(false)});
-   const {data}=sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){sessionRole.current=null;setProfile(null)}});
-   // Only staff are signed out when closing or backgrounding the app.
-   // Managers remain signed in until they explicitly choose "Çıkış Yap".
-   const logoutStaffOnExit=()=>{if(sessionRole.current==="staff")void sb.auth.signOut({scope:"local"}).catch(()=>{})};
-   const logoutWhenHidden=()=>{if(document.visibilityState==="hidden")logoutStaffOnExit()};
-   const logoutWhenLeaving=()=>logoutStaffOnExit();
-   document.addEventListener("visibilitychange",logoutWhenHidden);
-   window.addEventListener("pagehide",logoutWhenLeaving);
-   return()=>{data.subscription.unsubscribe();document.removeEventListener("visibilitychange",logoutWhenHidden);window.removeEventListener("pagehide",logoutWhenLeaving)};
+   refresh().catch(e=>{handleError(e);setLoading(false)});
+   // Both manager and employee sessions persist until explicit sign-out.
+   const {data}=sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT")setProfile(null)});
+   return()=>{data.subscription.unsubscribe()};
  },[]);
  useEffect(()=>{
    if(tab!=="aylik"||profile?.role!=="manager")return;
@@ -331,7 +318,7 @@ export default function Home(){
  </form>
  <p className="hint">E-posta gönderimi için ayrıca güvenli gönderim servisi (Resend) kurulmalıdır. Servis etkinleşene kadar izin talepleriniz uygulamada bildirim olarak görünmeye devam eder.</p>
  </section>
- <section className="panel"><h2>Otel Wi-Fi Ağını Tanımla</h2><p className="muted">Personeller yalnızca tanımladığınız otel ağından mesai giriş ve çıkışı yapabilir. Bu işlemi yaparken telefonunuzun veya bilgisayarınızın otelin Wi-Fi ağına bağlı olduğundan emin olun.</p><div className="actions" style={{marginTop:14}}><button disabled={busy} onClick={()=>doTask(async()=>{const {data,error}=await sb.rpc("hotel_register_wifi");if(error)throw error;if(!data)throw Error("Ağ bilgisi alınamadı")}, "Otel Wi-Fi ağı tanımlandı.")}>Bu Wi-Fi Ağını Tanımla</button></div>{wifiNetworks.length>0?<div style={{marginTop:12}}>{wifiNetworks.map(w=><div className="row" key={w.id}><span>Tanımlı Ağ: <b>{w.ip}</b></span><button className="danger" disabled={busy} onClick={()=>{if(confirm("Bu Wi-Fi ağı kaldırılacak. Bu ağdan mesai yapılamayacak. Devam edilsin mi?"))doTask(async()=>{const {error}=await sb.rpc("hotel_remove_wifi",{p_id:w.id});if(error)throw error},"Wi-Fi ağı kaldırıldı.")}}>Kaldır</button></div>)}</div>:<p className="hint">Henüz otel Wi-Fi ağı tanımlanmadı. Tanımlanana kadar personel mesai giriş-çıkışı kapalıdır.</p>}</section>
+
  </>}
  {tab==="mesai"&&<>{!manager&&<section className="panel"><h2>Mesai Giriş / Çıkış</h2><p className="muted">Bu ay toplam çalışma: {totalHours.toFixed(1)} saat</p><p className="hint">{ownOpen?"Açık mesainiz bulunuyor. Çıkış yapabilirsiniz.":"Aktif mesainiz bulunmuyor."}</p><div className="actions" style={{marginTop:15}}><button disabled={busy||!!ownOpen} onClick={()=>doTask(async()=>{const {error}=await sb.rpc("hotel_clock_in");if(error)throw error},"Giriş başarıyla kaydedildi ✓")}>Giriş Yap</button><button className="secondary" disabled={busy||!ownOpen} onClick={()=>doTask(async()=>{const {error}=await sb.rpc("hotel_clock_out");if(error)throw error},"Çıkış başarıyla kaydedildi ✓")}>Çıkış Yap</button></div></section>}
  {manager&&editShift&&<section className="panel"><h2>Mesai Düzenle</h2><p>{label(editShift.staff_id)}</p><form key={editShift.id} onSubmit={e=>{e.preventDefault();const d=values(e);doTask(async()=>{const a=new Date(d.check_in),b=d.check_out?new Date(d.check_out):null;if(Number.isNaN(a.getTime())||(b&&b<a))throw Error("Saatleri kontrol edin.");const {error}=await sb.from("hotel_attendance").update({check_in:a.toISOString(),check_out:b?.toISOString()||null,work_date:d.check_in.slice(0,10),edited_by:profile.id,updated_at:new Date().toISOString()}).eq("id",editShift.id);if(error)throw error})}}>
